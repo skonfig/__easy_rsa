@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Tests whether the binary exists in its supposed location
+# Echoes "present" or "absent"
+
+supposed_location="/usr/share/easy-rsa/easyrsa"
+
+if test -f ${supposed_location} && test -x ${supposed_location}; then
+	echo "present"
+else
+	echo "absent"
+fi
+

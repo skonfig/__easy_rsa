@@ -1,0 +1,49 @@
+#!/bin/sh -e
+#
+# 2020 Marko Seric (marko.seric@ssrq-sds-fds.ch)
+#
+# This file is part of cdist.
+#
+# cdist is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# cdist is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with cdist. If not, see <http://www.gnu.org/licenses/>.
+#
+
+
+# TODOS
+#
+# - pki's sind in ordnern 'pki'
+# - Common Name / Distinguished Name muss gesetzt werden, darf nicht parameterisiert werden
+# - wie kann man ein passwort setzen?
+#
+# NEXT STEPS
+# 1. wird eine pki ueber schrieben?
+# 1. wenn ja: einfach pki machen
+# 1. was sind deklarative statements die ich haben will?
+#
+
+
+os=$(cat "$__global/explorer/os")
+
+case "$os" in
+   (devuan|debian)
+      __package easy-rsa --state present
+   ;;
+   (*)
+      printf "Your operating system (%s) is currently not supported by this type (%s)\n" "$os" "${__type##*/}" >&2
+      printf "Please contribute an implementation for it if you can.\n" >&2
+      exit 1
+   ;;
+esac
+
+
+
