@@ -32,10 +32,3 @@ in
 		exit 1
 		;;
 esac
-
-
-pki_state=$(cat "${__object:?}/explorer/pki-presence")
-if [ "${pki_state}" = "absent" ] && [ -z ${__cdist_dry_run+real_run} ]; then
-   echo "No PKI found. Exiting" >&2
-   exit 1
-fi
