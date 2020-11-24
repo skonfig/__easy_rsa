@@ -1,6 +1,7 @@
 #!/bin/sh -e
 #
-# 2020 Marko Seric (marko.seric@ssrq-sds-fds.ch)
+# 2020 Marko Seric (marko.seric at ssrq-sds-fds.ch)
+# 2020 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
 #
 # This file is part of cdist.
 #
@@ -19,71 +20,72 @@
 #
 
 # Set the executable for easy-rsa
-easyrsa_executable=""
-# shellcheck disable=SC2154 # __global will be set in cdist execution
-os=$(cat "${__global}/explorer/os")
-case "$os" in
-   (debian|devuan)
-      easyrsa_executable="/usr/share/easy-rsa/easyrsa"
-      ;;
-   (*)
-      printf "Your operating system (%s) is currently not supported by this type (%s)\n" "$os" "${__type##*/}" >&2
-      printf "Please contribute an implementation for it if you can.\n" >&2
-      exit 1
-      ;;
+easyrsa_executable=
+os=$(cat "${__global:?}/explorer/os")
+case ${os}
+in
+	(debian|devuan)
+		easyrsa_executable='/usr/share/easy-rsa/easyrsa'
+		;;
+	(*)
+		printf "Your operating system (%s) is currently not supported by this type (%s)\n" "${os}" "${__type##*/}" >&2
+		printf "Please contribute an implementation for it if you can.\n" >&2
+		exit 1
+		;;
 esac
 
 # Check validity of the supplied parameters
-# shellcheck source=/dev/null # ${type} will be set at runtime
-. "${__type}/files/check_parameter_validity.sh"
+# shellcheck source=/dev/null
+. "${__type:?}/files/check_parameter_validity.sh"
 
 check_parameter_validity_usealgo
 
 ## Check required parameters for sanity
 supplied_cert_type=$(cat "${__object:?}/parameter/cert-type")
-case "${supplied_cert_type}" in
-   (server|client)
-      ;; # These two are okay
-   (*)
-      printf 'cert-type should be either "server" or "client".' >&2
-      exit 1
-      ;;
+case ${supplied_cert_type}
+in
+	(server|client)
+		;;  # These two are okay
+	(*)
+		echo 'cert-type should be either "server" or "client".' >&2
+		exit 1
+		;;
 esac
 
 build_subcommand="build-${supplied_cert_type}-full"
 
 optional_parameter_if_present() {
-   value_to_return=""
-   if [ -f "${__object:?}/parameter/$1" ]; then
-      supplied_value=$(head -n 1 "${__object:?}/parameter/$1")
-      value_to_return="${supplied_value}"
-   fi
-   echo "${value_to_return}"
+	if test -f "${__object:?}/parameter/$1"
+	then
+		echo "$(head -n 1 "${__object:?}/parameter/$1")"
+	fi
 }
 
 # # TODO can this be condensed?
-# cert_options=""
+# cert_options=
 # ks_=$(optional_parameter_if_present keysize)
 # if [ -n "${ks_}" ]; then
 #     cert_options=" --keysize=\"${ks_}\""
 # fi
-# 
+#
 # ua_=$(optional_parameter_if_present use-algo)
 # if [ -n "${ua_}" ]; then
 #     cert_options=" --use-algo=\"${ua_}\""
 # fi
-# 
+#
 # dy_=$(optional_parameter_if_present cert-expiration-days)
 # if [ -n "${dy_}" ]; then
 #     cert_options=" --days=\"${dy_}\""
 # fi
-# 
+#
 
 cert_already_present=$(cat "${__object:?}/explorer/cert-presence")
+common_name=${__object_id:?}
 command_to_execute="${easyrsa_executable} ${cert_options} ${build_subcommand} ${common_name} nopass"
-if [ "${cert_already_present}" != "present" ]; then
-   directory_with_pki=$(cat "${__object:?}/parameter/pki-dir")
-   common_name="${__object_id:?}"
-   echo "cd ${directory_with_pki}"
-   echo "${command_to_execute}"
+
+if test "${cert_already_present}" != 'present'
+then
+	pki_dir=$(cat "${__object:?}/parameter/pki-dir")
+	echo "cd ${pki_dir}"
+	echo "${command_to_execute}"
 fi

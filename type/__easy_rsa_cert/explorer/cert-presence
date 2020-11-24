@@ -2,8 +2,7 @@
 
 # Return "present" if there already a cert, "" otherwise
 
-supplied_dir=$(cat "${__object:?}/parameter/pki-dir")
-pki_dir="${supplied_dir}/pki"
-common_name="${__object_id:?}"
+pki_dir=$(cat "${__object:?}/parameter/pki-dir")
+common_name=${__object_id:?}
 
-test -f "${pki_dir}/issued/${common_name}.crt" && echo "present" || echo ""
+test -f "${pki_dir}/issued/${common_name}.crt" && echo 'present' || echo 'absent'
