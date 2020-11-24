@@ -72,7 +72,7 @@ vars_and_values=$(
 	done < "${__type:?}/files/param_mapping.txt"
 )
 
-current_vars_values_sorted=$(cat "${__object:?}/explorer/current-vars-condensed")
+current_vars_values_sorted=$(cat "${__object:?}/explorer/vars")
 supplied_vars_values_sorted=$(printf "%s" "${vars_and_values}" | sort)
 
 

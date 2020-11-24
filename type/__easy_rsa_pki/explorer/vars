@@ -1,0 +1,19 @@
+#!/bin/sh -e
+#
+# Return the currently set variables in a sorted and "condensed" form.
+# Only variables which are not commented are printed.
+# I.e. each line looks like the following example:
+#
+# EASYRSA_DN "org"
+# EASYRSA_REQ_COUNTRY "CH"
+# EASYRSA_KEY_SIZE 2048
+#
+
+base_dir="/${__object_id:?}"
+vars_file="${base_dir}/vars"
+
+test -f "${vars_file}" || exit 0
+
+sed -n 's/^[ \t]*set_var[ \t]\{1,\}\([A-Z_0-9]\{1,\}\)[ \t]\{1,\}/\1 /p' \
+	"${vars_file}" \
+| sort
