@@ -8,16 +8,19 @@ cdist-type__easy_rsa_pki - Install an easy-rsa PKI
 
 DESCRIPTION
 -----------
-This cdist type can be used to set up an easy_rsa PKI and manage its
-configurations.
+This cdist type can be used to set up an Easy-RSA PKI structure in the
+``__object_id`` directory on the target and manage its configuration.
 
-The optional parameters will have an effect on the `vars` file.
+**NB:** That the directory in ``__object_id`` is required to be empty.
+The ``EASYRSA_PKI`` will be located at ``${__object_id}/pki``.
 
-This cdist type does not build an easy-rsa CA (for this,
-see `__easy_rsa_ca`\ (7)).
+The optional parameters will have an effect on the ``vars`` file.
 
-One easy-rsa PKI can hold at most one easy-rsa CA, so it is necessary to
-use this type once for each `__easy_rsa_ca` usage.
+This cdist type does not build an Easy-RSA CA (for this,
+see :strong:`cdist-type__easy_rsa_ca`\ (7)).
+
+One Easy-RSA PKI can hold at most one CA, so it is necessary to
+use this type once for each usage of ``__easy_rsa_ca``.
 
 REQUIRED PARAMETERS
 -------------------
@@ -26,44 +29,55 @@ None.
 
 OPTIONAL PARAMETERS
 -------------------
-
-default-keysize
-    The size in bits for your keypairs. Only used when the crypto algorithm
-    is rsa.
-
-use-algo
-    The crypto mode to use. Possible values are "rsa" and "ec"
-    (all lowercase), for RSA mode and Elliptic Curve Cryptography.
-    The default mode is "rsa".
-
-default-ec-curve
-    The default named EC curve to use.
-
-dn-mode
-    The X509 DN mode. Choices are
-      cn_only  - use just a CN value
-      org      - use the "traditional" Country/Province/City/Org/OU/email/CN format
-
-digest
-    Cryptographic digest to use.
-    Do not change this default unless you understand the security implications.
-    Valid choices include: md5, sha1, sha256, sha224, sha384, sha512
-
 ca-expire-days
-    The default CA expiration time in days.
+    The default CA validity time in days.
 
 cert-expire-days
     The default expiration time in days for issued certs.
-
-crl-publish-days
-    The default days until the next publish date of the CRL.
 
 cert-renewal-allowed-days
     The default days before expiration an issued certificate is allowed to
     be renewed.
 
+crl-publish-days
+    The default days until the next publish date of the CRL.
+
+default-ec-curve
+    The default named EC curve to use (if ``--use-algo ec``).
+
+default-keysize
+    The size in bits for your keypairs.
+    Only used if ``--use-algo rsa``.
+
+digest
+    Cryptographic digest to use.
+    Do not change this default unless you understand the security implications.
+
+    Valid choices include: md5, sha1, sha256, sha224, sha384, sha512
+
+dn-mode
+    The X509 DN (Distinguished Name) mode.
+    Choices are:
+
+    cn_only
+        use just a CN value.
+    org
+        use the "traditional" Country/Province/City/Org/OU/email/CN format.
+
+use-algo
+    The crypto mode to use.
+    Possible values:
+
+    rsa
+        RSA mode.
+    ec
+        Elliptic Curve Cryptography mode.
+
+    Default is: ``rsa``.
+
+
 The following optional parameters correspond to the default values in
-organisational fields (used only in 'org' mode and ignored in 'cn_only' mode).
+organisational fields (only used if ``--dn-mode org``):
 
 default-req-country
     Country.
@@ -81,7 +95,7 @@ default-req-email
     Email.
 
 default-req-ou
-    Organisational unit
+    Organisational unit.
 
 
 BOOLEAN PARAMETERS
@@ -94,27 +108,39 @@ EXAMPLES
 
 .. code-block:: sh
 
-    # Ensure existence of pki in directroy `/some/folder`
-    `__easy_rsa_pki /some/folder`
+    # Ensure existence of an Easy-RSA PKI structure in directory /etc/easy-rsa
+    __easy_rsa_pki /etc/easy-rsa
 
-    # Ensure existence of pki in directory `/some/folder` and set some params.
-    `__easy_rsa_pki ${pki_dir} --use-algo rsa --default-keysize 119 --dn-mode cn_only --digest sha512 --default-req-country CH --default-req-province SG --default-req-city Werdenberg --default-req-org SSRQ --default-req-email test@example.com --default-req-ou "Unit 1"`
-
+    # Ensure existence of a PKI in directory /etc/easy-rsa with defaults
+    __easy_rsa_pki /etc/easy-rsa \
+        --use-algo rsa \
+        --default-keysize 119 \
+        --dn-mode org \
+        --digest sha512 \
+        --default-req-country CH \
+        --default-req-province SG \
+        --default-req-city Werdenberg \
+        --default-req-org SSRQ \
+        --default-req-email test@example.com \
+        --default-req-ou "Unit 1"`
 
 
 SEE ALSO
 --------
-:strong:`__easy_rsa_ca`\ (7), `__easy_rsa_cert`\ (7)
+:strong:`cdist-type__easy_rsa_ca`\ (7),
+:strong:`cdist-type__easy_rsa_cert`\ (7)
 
 
 AUTHORS
 -------
-Marko Seric <marko.seric@ssrq-sds-fds.ch>
+Marko Seric <marko.seric--@--ssrq-sds-fds.ch>
+Beni Ruef <bernhard.ruef--@--ssrq-sds-fds.ch>
+Dennis Camera <dennis.camera--@--ssrq-sds-fds.ch>
 
 
 COPYING
 -------
-Copyright \(C) 2020 Marko Seric. You can redistribute it
+Copyright \(C) 2020 the AUTHORS. You can redistribute it
 and/or modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.

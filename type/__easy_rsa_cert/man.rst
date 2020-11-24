@@ -3,34 +3,82 @@ cdist-type__easy_rsa_cert(7)
 
 NAME
 ----
-cdist-type__easy_rsa_cert - Uses easy-rsa to generate a keypair and
-sign it locally for a client or a server.
+cdist-type__easy_rsa_cert - Manage a server or client key pair.
 
 
 DESCRIPTION
 -----------
-This type generates either a server certificate or a client certificate,
-depending on `cert-type`. 
+This type manages private keys and certificates using Easy-RSA.
+The certificate type (server or client) can be defined using ``--cert-type``.
+
+As a prerequisite the :strong:`cdist-type__easy_rsa_pki`\ (7) and
+:strong:`cdist-type__easy_rsa_ca`\ (7) must have created a PKI structure and
+Certificate Authority (CA) in said directory beforehand.
+
+**NB:** This type will neither update an existing certificate's subject nor
+other parameters if the object's parameters are changed at a later point in
+time.
 
 
 REQUIRED PARAMETERS
 -------------------
 cert-type
-    The type of the certificate, either 'server' or 'client'.
+    The type of the certificate, either ``server`` or ``client``.
+dir
+    Full path of the corresponding Easy-RSA PKI structure (as created by
+    :strong:`cdist-type__easy_rsa_pki`\ (7)).
 
-pki-dir
-    Full path of the directory inside which the easy-rsa PKI resides.
 
 OPTIONAL PARAMETERS
 -------------------
-keysize
-    The keysize to use for the request.
-
-use-algo
-    The algorithm to use. Allowed values are "rsa" and "ec".
-
 cert-expiration-days
     Days until expiration of the certificate.
+common-name
+    The Common Name (CN) for this CA.
+    Defaults to ``__object_id``.
+digest
+    The digest to use for the CA.
+    Valid choices include: md5, sha1, sha256, sha224, sha384, sha512
+key-size
+    The keysize to use for the request.
+state
+    Possible values:
+
+    signed
+        the certificate has been created and signed by the CA.
+    valid
+        like signed, but will renew the certificate if it expired.
+    revoked
+        either the certificate is no defined, or will be revoked.
+
+    Default is: ``signed``.
+use-algo
+    The algorithm to use.
+    Possible values:
+
+    rsa
+        RSA mode.
+    ec
+        Elliptic Curve Cryptography mode.
+
+    Default is: ``rsa``.
+
+
+The following optional parameters correspond to the default values in
+organisational fields (only used if the PKI's DN mode is set to ``org``):
+
+country
+    Country.
+province
+    Province.
+city
+    City.
+org
+    Organisation.
+org-unit
+    Organisational unit.
+email
+    Email.
 
 
 BOOLEAN PARAMETERS
@@ -42,26 +90,33 @@ EXAMPLES
 --------
 
 .. code-block:: sh
-    # Generating a server cert request, where there is already
-    # a PKI of type `__easy_rsa_pki /etc/easyrsa`
-    `__easy_rsa_cert example.com --pki-dir /etc/easyrsa --cert-type server`
+    # server certificate
+    __easy_rsa_cert openvpn-server \
+        --dir /etc/easy-rsa \
+        --cert-type server
 
-
+    # client certificate
+    __easy_rsa_cert janedoe \
+        --dir /etc/easy-rsa \
+        --cert-type client
 
 
 SEE ALSO
 --------
-:strong:`__easy_rsa_pki`\ (7), `__easy_rsa_cert`\ (7)
+:strong:`cdist-type__easy_rsa_pki`\ (7),
+:strong:`cdist-type__easy_rsa_ca`\ (7)
 
 
 AUTHORS
 -------
-Marko Seric <marko.seric@ssrq-sds-fds.ch>
+Marko Seric <marko.seric--@--ssrq-sds-fds.ch>
+Beni Ruef <bernhard.ruef--@--ssrq-sds-fds.ch>
+Dennis Camera <dennis.camera--@--ssrq-sds-fds.ch>
 
 
 COPYING
 -------
-Copyright \(C) 2020 Marko Seric. You can redistribute it
+Copyright \(C) 2020 the AUTHORS. You can redistribute it
 and/or modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.
