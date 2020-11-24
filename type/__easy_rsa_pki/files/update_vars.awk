@@ -16,32 +16,32 @@ BEGIN {
 
 edits_allowed {
 	line = $0
-	sub(/^#*[ \t]*/, "", line)
+	sub(/^[ \t]*#*[ \t]*/, "", line)
 	split(line, toks)
 	# toks[i] = { "set_var", key, ... }
-	
+
 	if (toks[1] == "set_var") {
 		varname = toks[2]
-		if (/^#/) {
+		if ($1 ~ /^#/) {
 			# keep comments
 			print
 		}
 		if ((varname in should)) {
 			# replace line with value from should
-			printf "set_var %s %s\n", varname, should[varname]
+			printf "set_var %s\t%s\n", varname, should[varname]
 			delete should[varname]
 		} else {
 			# drop it
 		}
 
-		next  # do not print line below
+		next  # do not print set_var line below
 	}
 }
 
 { print }
 
 END {
-	for (k in should) {
-		printf "set_var %s %s\n", k, should[k]
+	for (varname in should) {
+		printf "set_var %s\t%s\n", varname, should[varname]
 	}
 }
