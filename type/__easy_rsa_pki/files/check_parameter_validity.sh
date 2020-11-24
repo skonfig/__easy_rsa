@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 fail_parameter_value() {
     printf 'Unsupported parameter for "%s": %s\n' "$1" "$2" >&2
@@ -31,15 +31,15 @@ matches() {
 #       fi
 #    fi
 # }
-# 
+#
 # check_parameter_validity_digest() {
 #    check_parameter "digest" "md5|sha1|sha256|sha224|sha384|sha512"
 # }
-# 
+#
 # check_parameter_validity_usealgo(){
 #    check_parameter "use-algo" "rsa|ec"
 # }
-# 
+#
 # check_parameter_validity_dnmode(){
 #    check_parameter "dn-mode" "cn_only|org"
 # }
@@ -85,4 +85,3 @@ if [ -f "${__object:?}/parameter/${parameter_name}" ]; then
    esac
 fi
 }
-

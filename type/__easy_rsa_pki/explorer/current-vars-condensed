@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # Return the currently set variables in a "condensed form".
 # Only variables which are not commented are printed.

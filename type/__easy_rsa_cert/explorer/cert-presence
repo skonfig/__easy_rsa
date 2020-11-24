@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # Return "present" if there already a cert, "" otherwise
 
@@ -7,4 +7,3 @@ pki_dir="${supplied_dir}/pki"
 common_name="${__object_id:?}"
 
 test -f "${pki_dir}/issued/${common_name}.crt" && echo "present" || echo ""
-

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # Return "absent" if no folder 'pki' is present, "present" otherwise.
 
@@ -30,4 +30,3 @@ fi
 
 # Nothing wrong found, return "present"
 echo "present"
-

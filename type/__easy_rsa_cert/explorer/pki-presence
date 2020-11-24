@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # Return "absent" if no easy-rsa PKI is present, "present" if one is present.
 
@@ -30,4 +30,3 @@ fi
 
 # Nothing wrong found, return "present"
 echo "present"
-
