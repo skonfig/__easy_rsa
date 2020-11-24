@@ -79,22 +79,22 @@ use-algo
 The following optional parameters correspond to the default values in
 organisational fields (only used if ``--dn-mode org``):
 
-default-req-country
+default-country
     Country.
 
-default-req-province
+default-province
     Province.
 
-default-req-city
+default-city
     City.
 
-default-req-org
+default-org
     Organisation.
 
-default-req-email
+default-email
     Email.
 
-default-req-ou
+default-ou
     Organisational unit.
 
 
@@ -117,12 +117,12 @@ EXAMPLES
         --default-keysize 119 \
         --dn-mode org \
         --digest sha512 \
-        --default-req-country CH \
-        --default-req-province SG \
-        --default-req-city Werdenberg \
-        --default-req-org SSRQ \
-        --default-req-email test@example.com \
-        --default-req-ou "Unit 1"`
+        --default-country CH \
+        --default-province SG \
+        --default-city Werdenberg \
+        --default-org SSRQ \
+        --default-email test@example.com \
+        --default-ou "Unit 1"`
 
 
 SEE ALSO

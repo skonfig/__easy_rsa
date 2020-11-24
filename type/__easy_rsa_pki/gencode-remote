@@ -69,7 +69,7 @@ vars_and_values=$(
 			supplied_value=$(head -n 1 "${__object:?}/parameter/${param}")
 			printf '%s "%s"\n' "${variable}" "${supplied_value}"
 		fi
-	done < "${__type:?}/files/parameter-keyvals"
+	done < "${__type:?}/files/param_mapping.txt"
 )
 
 current_vars_values_sorted=$(cat "${__object:?}/explorer/current-vars-condensed")
