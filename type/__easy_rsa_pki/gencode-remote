@@ -21,6 +21,7 @@
 
 quote() { printf "'%s'" "$(printf '%s' "$*" | sed -e "s/'/'\\\\''/g")"; }
 drop_awk_comments() { quote "$(sed '/^[[:blank:]]*#.*$/d;/^$/d' "$@")"; }
+quote_nonnum() { sed 's/^.*[^0-9].*$/"&"/;q' "$@"; }
 
 # Set the executable for easy-rsa
 easyrsa_executable=
@@ -64,11 +65,10 @@ fi
 vars_and_values=$(
 	while read -r param variable
 	do
-		if test -f "${__object:?}/parameter/${param}"
-		then
-			supplied_value=$(head -n 1 "${__object:?}/parameter/${param}")
-			printf '%s "%s"\n' "${variable}" "${supplied_value}"
-		fi
+		test -f "${__object:?}/parameter/${param}" || continue
+		printf '%s %s\n' \
+			"${variable}" \
+			"$(quote_nonnum "${__object:?}/parameter/${param}")"
 	done < "${__type:?}/files/param_mapping.txt"
 )
 
