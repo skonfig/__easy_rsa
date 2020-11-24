@@ -1,6 +1,6 @@
 default-keysize
 use-algo
-default-ec-curve EASYRSA_CURVE (CLI: --curve) - define the named EC curve to use
+default-ec-curve
 dn-mode
 digest
 default-req-country
