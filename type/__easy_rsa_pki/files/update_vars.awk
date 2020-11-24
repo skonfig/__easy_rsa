@@ -4,11 +4,12 @@ BEGIN {
 	FS = "[ \t]"
 
 	# Store the should state read from stdin in should array
-	while ((getline should_line < "/dev/stdin")) {
+	while (("cat" | getline should_line)) {
 		k = substr(should_line, 1, index(should_line, " ") - 1)
 		v = substr(should_line, length(k) + 2)
 		should[k] = v
 	}
+	close("cat")
 }
 
 /^# DO YOUR EDITS BELOW THIS POINT/ { edits_allowed = 1 }
