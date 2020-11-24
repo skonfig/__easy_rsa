@@ -1,6 +1,7 @@
 #!/bin/sh -e
 #
-# 2020 Marko Seric (marko.seric@ssrq-sds-fds.ch)
+# 2020 Marko Seric (marko.seric at ssrq-sds-fds.ch)
+# 2020 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
 #
 # This file is part of cdist.
 #
@@ -17,46 +18,45 @@
 # You should have received a copy of the GNU General Public License
 # along with cdist. If not, see <http://www.gnu.org/licenses/>.
 #
-# TODO documentation
 
 
-# Set the executable for easy-rsa
-easyrsa_executable=""
-# shellcheck disable=SC2154 # __global will be set in cdist execution
-os=$(cat "${__global}/explorer/os")
-case "$os" in
-   (debian|devuan)
-      easyrsa_executable="/usr/share/easy-rsa/easyrsa"
-      ;;
-   (*)
-      printf "Your operating system (%s) is currently not supported by this type (%s)\n" "$os" "${__type##*/}" >&2
-      printf "Please contribute an implementation for it if you can.\n" >&2
-      exit 1
-      ;;
+easyrsa_executable=
+os=$(cat "${__global:?}/explorer/os")
+case ${os}
+in
+	(debian|devuan)
+		easyrsa_executable='/usr/share/easy-rsa/easyrsa'
+		;;
+	(*)
+		printf "Your operating system (%s) is currently not supported by this type (%s)\n" "${os}" "${__type##*/}" >&2
+		printf "Please contribute an implementation for it if you can.\n" >&2
+		exit 1
+		;;
 esac
 
 
 # Check validity of the supplied parameters
-# shellcheck source=/dev/null # ${type} will be set at runtime
-. "${__type}/files/check_parameter_validity.sh"
+# shellcheck source=/dev/null
+. "${__type:?}/files/check_parameter_validity.sh"
 
 check_parameter_validity_digest
 
 
 directory_with_pki=$(cat "${__object:?}/parameter/pki-dir")
-common_name="${__object_id:?}"
+common_name=${__object_id:?}
 
-digest_parameter=""
-if [ -f "${__object:?}/parameter/digest" ]; then
-   supplied_value=$(head -n 1 "${__object:?}/parameter/digest")
-   digest_parameter="--digest=\"${supplied_value}\""
+digest_parameter=
+if [ -f "${__object:?}/parameter/digest" ]
+then
+	supplied_value=$(head -n 1 "${__object:?}/parameter/digest")
+	digest_parameter="--digest=\"${supplied_value}\""
 fi
 
 command_to_execute="${easyrsa_executable} --batch --req-cn=\"${common_name}\" ${digest_parameter} build-ca nopass"
 
 ca_state=$(cat "${__object:?}/explorer/ca-presence")
-if [ "${ca_state}" = "absent" ]; then
-   echo "cd ${directory_with_pki}"
-   echo "${command_to_execute}"
+if [ "${ca_state}" = 'absent' ]
+then
+	echo "cd ${directory_with_pki}"
+	echo "${command_to_execute}"
 fi
-

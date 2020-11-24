@@ -1,6 +1,7 @@
 #!/bin/sh -e
 #
-# 2020 Marko Seric (marko.seric@ssrq-sds-fds.ch)
+# 2020 Marko Seric (marko.seric at ssrq-sds-fds.ch)
+# 2020 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
 #
 # This file is part of cdist.
 #
@@ -18,18 +19,18 @@
 # along with cdist. If not, see <http://www.gnu.org/licenses/>.
 #
 
-# shellcheck disable=SC2154 # $__global will be supplied by cdist
-os=$(cat "$__global/explorer/os")
+os=$(cat "${__global:?}/explorer/os")
 
-case "$os" in
-   (devuan|debian)
-      __package easy-rsa --state present
-   ;;
-   (*)
-      printf "Your operating system (%s) is currently not supported by this type (%s)\n" "$os" "${__type##*/}" >&2
-      printf "Please contribute an implementation for it if you can.\n" >&2
-      exit 1
-   ;;
+case ${os}
+in
+	(devuan|debian)
+		__package easy-rsa --state present
+		;;
+	(*)
+		printf "Your operating system (%s) is currently not supported by this type (%s)\n" "${os}" "${__type##*/}" >&2
+		printf "Please contribute an implementation for it if you can.\n" >&2
+		exit 1
+		;;
 esac
 
 

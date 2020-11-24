@@ -1,29 +1,30 @@
 #!/bin/sh -e
 
-# Return "absent" if no CA present, "present" otherwise
+# Return "present" if the CA is present, "absent" otherwise.
 
-supplied_dir=$(cat "${__object:?}/parameter/pki-dir")
-pki_dir="${supplied_dir}/pki"
+pki_dir=$(cat "${__object:?}/parameter/pki-dir")
 
-result="absent"
+test -d "${pki_dir}" || {
+	echo 'absent'
+	exit 0
+}
 
+result='absent'
 
-# Check all the files
-expected_files_in_pki="serial index.txt index.txt.attr ca.crt private/ca.key"
-
-# Check all the folders
-for file in ${expected_files_in_pki}; do
-	if [ -f "${pki_dir}/${file}" ]; then
-		result="present"
+for dir in issued certs_by_serial
+do
+	if [ -d "${pki_dir}/${dir}" ]
+	then
+		result='present'
 	fi
 done
 
-expected_dirs_in_pki="issued certs_by_serial"
-
-for dir in ${expected_dirs_in_pki}; do
-	if [ -d "${pki_dir}/${dir}" ]; then
-		result="present"
+for file in serial index.txt index.txt.attr ca.crt private/ca.key
+do
+	if [ -f "${pki_dir}/${file}" ]
+	then
+		result='present'
 	fi
 done
 
-echo ${result}
+echo "${result}"
