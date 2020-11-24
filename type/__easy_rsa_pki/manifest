@@ -1,6 +1,7 @@
 #!/bin/sh -e
 #
-# 2020 Marko Seric (marko.seric@ssrq-sds-fds.ch)
+# 2020 Marko Seric (marko.seric at ssrq-sds-fds.ch)
+# 2020 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
 #
 # This file is part of cdist.
 #
@@ -18,26 +19,21 @@
 # along with cdist. If not, see <http://www.gnu.org/licenses/>.
 #
 
-os=$(cat "$__global/explorer/os")
+os=$(cat "${__global:?}/explorer/os")
 
-# Ensure that easy-rsa is installed
-case "$os" in
-   (debian|devuan)
-      __package easy-rsa --state present
-      ;;
-   (*)
-      printf "Your operating system (%s) is currently not supported by this type (%s)\n" "$os" "${__type##*/}" >&2
-      printf "Please contribute an implementation for it if you can.\n" >&2
-      exit 1
-      ;;
+case ${os}
+in
+	(debian|devuan)
+		# Ensure that easy-rsa is installed
+		__package easy-rsa --state present
+		;;
+	(*)
+		printf "Your operating system (%s) is currently not supported by this type (%s)\n" "${os}" "${__type##*/}" >&2
+		printf "Please contribute an implementation for it if you can.\n" >&2
+		exit 1
+		;;
 esac
-
-
-
 
 # Ensure that pki-dir exists
 directory="/${__object_id:?}"
-__directory ${directory} --owner root --group root --mode 0750
-
-mkdir -p "${__object}/files"
-
+__directory "${directory}" --owner root --group root --mode 0750
