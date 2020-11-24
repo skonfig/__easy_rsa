@@ -1,0 +1,15 @@
+default-keysize
+use-algo
+default-ec-curve EASYRSA_CURVE (CLI: --curve) - define the named EC curve to use
+dn-mode
+digest
+default-req-country
+default-req-province
+default-req-city
+default-req-org
+default-req-email
+default-req-ou
+ca-expire-days
+cert-expire-days
+crl-publish-days
+cert-renewal-allowed-days

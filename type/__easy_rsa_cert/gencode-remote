@@ -17,8 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with cdist. If not, see <http://www.gnu.org/licenses/>.
 #
-# TODO documentation
-
 
 # Set the executable for easy-rsa
 easyrsa_executable=""
@@ -35,28 +33,57 @@ case "$os" in
       ;;
 esac
 
-
 # Check validity of the supplied parameters
 # shellcheck source=/dev/null # ${type} will be set at runtime
 . "${__type}/files/check_parameter_validity.sh"
 
-check_parameter_validity_digest
+check_parameter_validity_usealgo
 
+## Check required parameters for sanity
+supplied_cert_type=$(cat "${__object:?}/parameter/cert-type")
+case "${supplied_cert_type}" in
+   (server|client)
+      ;; # These two are okay
+   (*)
+      printf 'cert-type should be either "server" or "client".' >&2
+      exit 1
+      ;;
+esac
 
-directory_with_pki=$(cat "${__object:?}/parameter/pki-dir")
-common_name="${__object_id:?}"
+build_subcommand="build-${supplied_cert_type}-full"
 
-digest_parameter=""
-if [ -f "${__object:?}/parameter/digest" ]; then
-   supplied_value=$(head -n 1 "${__object:?}/parameter/digest")
-   digest_parameter="--digest=\"${supplied_value}\""
-fi
+optional_parameter_if_present() {
+   value_to_return=""
+   if [ -f "${__object:?}/parameter/$1" ]; then
+      supplied_value=$(head -n 1 "${__object:?}/parameter/$1")
+      value_to_return="${supplied_value}"
+   fi
+   echo "${value_to_return}"
+}
 
-command_to_execute="${easyrsa_executable} --batch --req-cn=\"${common_name}\" ${digest_parameter} build-ca nopass"
+# # TODO can this be condensed?
+# cert_options=""
+# ks_=$(optional_parameter_if_present keysize)
+# if [ -n "${ks_}" ]; then
+#     cert_options=" --keysize=\"${ks_}\""
+# fi
+# 
+# ua_=$(optional_parameter_if_present use-algo)
+# if [ -n "${ua_}" ]; then
+#     cert_options=" --use-algo=\"${ua_}\""
+# fi
+# 
+# dy_=$(optional_parameter_if_present cert-expiration-days)
+# if [ -n "${dy_}" ]; then
+#     cert_options=" --days=\"${dy_}\""
+# fi
+# 
 
-ca_state=$(cat "${__object:?}/explorer/ca-presence")
-if [ "${ca_state}" = "absent" ]; then
+cert_already_present=$(cat "${__object:?}/explorer/cert-presence")
+command_to_execute="${easyrsa_executable} ${cert_options} ${build_subcommand} ${common_name} nopass"
+if [ "${cert_already_present}" != "present" ]; then
+   directory_with_pki=$(cat "${__object:?}/parameter/pki-dir")
+   common_name="${__object_id:?}"
    echo "cd ${directory_with_pki}"
    echo "${command_to_execute}"
 fi
-

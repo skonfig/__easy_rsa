@@ -18,29 +18,26 @@
 # along with cdist. If not, see <http://www.gnu.org/licenses/>.
 #
 
-
 os=$(cat "$__global/explorer/os")
 
+# Ensure that easy-rsa is installed
 case "$os" in
    (debian|devuan)
-      __package easy-rsa
-   ;;
+      __package easy-rsa --state present
+      ;;
    (*)
       printf "Your operating system (%s) is currently not supported by this type (%s)\n" "$os" "${__type##*/}" >&2
       printf "Please contribute an implementation for it if you can.\n" >&2
       exit 1
-   ;;
+      ;;
 esac
 
-# Ensure that the easyrsa executable is present
-foo=$(cat "${__object}/explorer/check-easyrsa-executable")
-if [ $foo == "absent" ]; then
-	echo "Executable for \"easyrsa\" not found. Exiting" >&2
-	exit 1
-fi
+
 
 
 # Ensure that pki-dir exists
-pki_dir=$(cat "${__object}/parameter/pki-dir")
-__directory ${pki_dir} --owner root --group root --mode 0755
+directory="/${__object_id:?}"
+__directory ${directory} --owner root --group root --mode 0750
+
+mkdir -p "${__object}/files"
 

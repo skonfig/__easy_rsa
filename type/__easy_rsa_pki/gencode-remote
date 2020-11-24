@@ -18,4 +18,68 @@
 # along with cdist. If not, see <http://www.gnu.org/licenses/>.
 #
 
+drop_awk_comments() { quote "$(sed '/^[[:blank:]]*#.*$/d;/^$/d' "$@")"; }
+quote() { printf "'%s'" "$(printf '%s' "$*" | sed -e "s/'/'\\\\''/g")"; }
+
+# Set the executable for easy-rsa
+easyrsa_executable=""
+# shellcheck disable=SC2154 # __global will be set in cdist execution
+os=$(cat "$__global/explorer/os")
+case "$os" in
+   (debian|devuan)
+      easyrsa_executable="/usr/share/easy-rsa/easyrsa"
+      ;;
+   (*)
+      printf "Your operating system (%s) is currently not supported by this type (%s)\n" "$os" "${__type##*/}" >&2
+      printf "Please contribute an implementation for it if you can.\n" >&2
+      exit 1
+      ;;
+esac
+
+pki_state=$(cat "${__object:?}/explorer/pki-presence")
+directory_to_hold_pki="/${__object_id:?}"
+vars_file="${directory_to_hold_pki}/vars"
+vars_file_new="${vars_file}.tmp"
+
+# Check validity of the supplied parameters
+# shellcheck source=/dev/null # ${type} will be set at runtime
+. "${__type}/files/check_parameter_validity.sh"
+
+check_parameter_validity_digest
+check_parameter_validity_usealgo
+check_parameter_validity_dnmode
+
+
+# Generate a new PKI if necessary
+if [ "${pki_state}" = "absent" ]; then
+	echo "cd ${directory_to_hold_pki}"
+	echo "${easyrsa_executable} init-pki"
+   # explicit vars file is better than implicit default vars
+   echo "cp /usr/share/easy-rsa/vars.example ${vars_file}"
+fi
+
+# Prepare the information to deremine if it needs to run, and act accordingly
+vars_and_values=$(
+while read -r param variable; do
+   if [ -f "${__object:?}/parameter/${param}" ]; then
+      supplied_value=$(head -n 1 "${__object:?}/parameter/${param}")
+      printf '%s "%s"\n' "${variable}" "${supplied_value}"
+   fi
+done < "${__type}/files/parameter-keyvals"
+)
+
+current_vars_values_sorted=$(cat "${__object:?}/explorer/current-vars-condensed")
+supplied_vars_values_sorted=$(printf "%s" "${vars_and_values}" | sort)
+
+
+if [ "${current_vars_values_sorted}" != "${supplied_vars_values_sorted}" ]; then
+echo "Currently set vars differ from supplied vars. Will update vars-file." >&2
+cat <<CODE
+awk $(drop_awk_comments "${__type:?}/files/update_vars.awk") $(quote "${vars_file}") <<'EOF' > $(quote "${vars_file_new}") \
+ && cp $(quote "${vars_file_new}") $(quote "${vars_file}") || exit 1
+${vars_and_values}
+EOF
+rm -f $(quote "${vars_file_new}")
+CODE
+fi
 

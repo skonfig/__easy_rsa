@@ -18,20 +18,7 @@
 # along with cdist. If not, see <http://www.gnu.org/licenses/>.
 #
 
-
-# TODOS
-#
-# - pki's sind in ordnern 'pki'
-# - Common Name / Distinguished Name muss gesetzt werden, darf nicht parameterisiert werden
-# - wie kann man ein passwort setzen?
-#
-# NEXT STEPS
-# 1. wird eine pki ueber schrieben?
-# 1. wenn ja: einfach pki machen
-# 1. was sind deklarative statements die ich haben will?
-#
-
-
+# shellcheck disable=SC2154 # $__global will be supplied by cdist
 os=$(cat "$__global/explorer/os")
 
 case "$os" in
@@ -46,4 +33,8 @@ case "$os" in
 esac
 
 
-
+pki_state=$(cat "${__object:?}/explorer/pki-presence")
+if [ "${pki_state}" = "absent" ] && [ -z ${__cdist_dry_run+real_run} ]; then
+   echo "No PKI found. Exiting" >&2
+   exit 1
+fi

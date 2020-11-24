@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Return the currently set variables in a "condensed form".
+# Only variables which are not commented are printed.
+# I.e. each line looks like the following example:
+#
+# EASYRSA_KEY_SIZE "1911"
+#
+# Also, for better comparison, the lines are sorted.
+
+directory="/${__object_id:?}"
+vars_file="${directory}/vars"
+
+currently_set_variables=""
+
+if [ -f ${vars_file} ]; then
+   currently_set_variables=$(
+   cat "${vars_file}" \
+   | grep -e '^[ \t]*set_var[ \t]*EASYRSA' \
+   | sed 's/^\s*//' | sed 's/set_var\s*//' \
+   | sed 's/\(EASYRSA_[A-Z_]*\)[ \t][ \t]*\(.*\)/\1 \2/' \
+   | sort
+   )
+fi
+
+printf "%s" "${currently_set_variables}"
