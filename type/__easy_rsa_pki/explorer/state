@@ -1,0 +1,31 @@
+#!/bin/sh -e
+#
+# Return "present" if a PKI folder is found and looks reasonable,
+# "absent" otherwise.
+#
+
+dir="/${__object_id:?}"
+
+if test -d "${dir}"
+then
+	for exp in vars openssl-easyrsa.cnf
+	do
+		test -f "${dir}/${exp}" || {
+			echo 'suspicious'
+			exit 0
+		}
+	done
+
+	# Check pki subdirectory
+	for exp in private reqs
+	do
+		test -d "${dir}/pki/${exp}" || {
+			echo 'suspicious'
+			exit 0
+		}
+	done
+
+	echo 'present'
+else
+	echo "absent"
+fi
