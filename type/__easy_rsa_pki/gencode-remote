@@ -41,7 +41,6 @@ state_is=$(cat "${__object:?}/explorer/pki-presence")
 
 pki_dir="/${__object_id:?}"
 vars_file="${pki_dir}/vars"
-vars_file_new="${vars_file}.tmp"
 
 # Check validity of the supplied parameters
 # shellcheck source=/dev/null
@@ -69,21 +68,17 @@ vars_and_values=$(
 		printf '%s %s\n' \
 			"${variable}" \
 			"$(quote_nonnum "${__object:?}/parameter/${param}")"
-	done < "${__type:?}/files/param_mapping.txt"
+	done <"${__type:?}/files/param_mapping.txt" \
+	| sort
 )
 
-current_vars_values_sorted=$(cat "${__object:?}/explorer/vars")
-supplied_vars_values_sorted=$(printf "%s" "${vars_and_values}" | sort)
-
-
-if [ "${current_vars_values_sorted}" != "${supplied_vars_values_sorted}" ]
+if ! printf '%s\n' "${vars_and_values}" | cmp -s "${__object:?}/explorer/vars" -
 then
-	echo "Currently set vars differ from supplied vars. Will update vars-file." >&2
 	cat <<CODE
-awk $(drop_awk_comments "${__type:?}/files/update_vars.awk") $(quote "${vars_file}") <<'EOF' > $(quote "${vars_file_new}") \\
- && cp $(quote "${vars_file_new}") $(quote "${vars_file}") || exit 1
+awk $(drop_awk_comments "${__type:?}/files/update_vars.awk") <<'EOF' $(quote "${vars_file}") >$(quote "${vars_file}.tmp") \\
+ && cat $(quote "${vars_file}.tmp") >$(quote "${vars_file}") || exit
 ${vars_and_values}
 EOF
-rm -f $(quote "${vars_file_new}")
+rm -f $(quote "${vars_file}.tmp")
 CODE
 fi
