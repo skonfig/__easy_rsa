@@ -52,8 +52,8 @@ fi
 
 command_to_execute="${easyrsa_executable} --batch --req-cn=\"${common_name}\" ${digest_parameter} build-ca nopass"
 
-ca_state=$(cat "${__object:?}/explorer/ca-presence")
-if [ "${ca_state}" = 'absent' ]
+state_is=$(cat "${__object:?}/explorer/state")
+if [ "${state_is}" = 'absent' ]
 then
 	echo "cd ${base_dir}"
 	echo "${command_to_execute}"
