@@ -48,12 +48,12 @@ test "${state_is}" != 'present' || exit 0
 
 opt_params=
 # loop through mapping file
-while read param_name option_name
+while read -r param_name option_name
 do
 	if test -s "${__object:?}/parameter/${param_name}"
 	then
 		value=$(head -n 1 "${__object:?}/parameter/${param_name}")
-		opt_params="${opt_params} --${option_name}=\"${value}\""
+		opt_params="${opt_params} --${option_name}='${value}'"
 	fi
 done <"${__type:?}/files/param_mapping.txt"
 
@@ -67,8 +67,10 @@ check_parameter_validity_digest
 if test -s "${__object:?}/parameter/digest"
 then
 	supplied_value=$(head -n 1 "${__object:?}/parameter/digest")
-	opt_params="${opt_params} --digest=\"${supplied_value}\""
+	opt_params="${opt_params} --digest='${supplied_value}'"
 fi
 
-echo "cd ${base_dir}"
-echo "${easyrsa_executable} --pki-dir=${base_dir}/pki --vars=${base_dir}/vars --req-cn='${common_name}' ${opt_params} --batch build-ca nopass"
+printf 'cd %s\n' "${base_dir}"
+printf '%s --pki-dir=%s --vars=%s --req-cn=%s %s --batch build-ca nopass\n' \
+	"${easyrsa_executable}" "${base_dir}/pki" "${base_dir}/vars" \
+	"${common_name}" "${opt_params# }"
