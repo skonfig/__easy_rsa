@@ -2,6 +2,7 @@
 #
 # 2020 Marko Seric (marko.seric at ssrq-sds-fds.ch)
 # 2020 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
+# 2020 Beni Ruef (bernhard.ruef at ssrq-sds-fds.ch)
 #
 # This file is part of cdist.
 #
@@ -39,8 +40,8 @@ esac
 check_parameter_validity_usealgo
 
 ## Check required parameters for sanity
-supplied_cert_type=$(cat "${__object:?}/parameter/cert-type")
-case ${supplied_cert_type}
+cert_type=$(cat "${__object:?}/parameter/cert-type")
+case ${cert_type}
 in
 	(server|client)
 		;;  # These two are okay
@@ -50,40 +51,18 @@ in
 		;;
 esac
 
-build_subcommand="build-${supplied_cert_type}-full"
-
-optional_parameter_if_present() {
-	if test -f "${__object:?}/parameter/$1"
-	then
-		echo "$(head -n 1 "${__object:?}/parameter/$1")"
-	fi
-}
-
-# # TODO can this be condensed?
-# cert_options=
-# ks_=$(optional_parameter_if_present keysize)
-# if [ -n "${ks_}" ]; then
-#     cert_options=" --keysize=\"${ks_}\""
-# fi
-#
-# ua_=$(optional_parameter_if_present use-algo)
-# if [ -n "${ua_}" ]; then
-#     cert_options=" --use-algo=\"${ua_}\""
-# fi
-#
-# dy_=$(optional_parameter_if_present cert-expiration-days)
-# if [ -n "${dy_}" ]; then
-#     cert_options=" --days=\"${dy_}\""
-# fi
-#
+req_options=
+if test -s "${__object:?}/parameter/common-name"
+then
+	req_options="--req-cn='$(head -n1 "${__object:?}/parameter/common-name")'"
+fi
 
 cert_already_present=$(cat "${__object:?}/explorer/cert-presence")
-common_name=${__object_id:?}
-command_to_execute="${easyrsa_executable} ${cert_options} ${build_subcommand} ${common_name} nopass"
-
 if test "${cert_already_present}" != 'present'
 then
 	base_dir=$(cat "${__object:?}/parameter/dir")
 	echo "cd ${base_dir}"
-	echo "${command_to_execute}"
+
+	echo "${easyrsa_executable} --pki-dir=${base_dir}/pki ${req_options} --batch gen-req ${__object_id:?} nopass"
+	echo "${easyrsa_executable} --pki-dir=${base_dir}/pki --batch sign-req ${cert_type} ${__object_id:?}"
 fi
