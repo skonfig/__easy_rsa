@@ -22,7 +22,7 @@
 
 base_dir=$(cat "${__object:?}/parameter/dir")
 
-if test -f "${__object:?}/parameter/common-name"
+if test -s "${__object:?}/parameter/common-name"
 then
 	common_name=$(cat "${__object:?}/parameter/common-name")
 else
@@ -50,7 +50,7 @@ opt_params=
 # loop through mapping file
 while read param_name option_name
 do
-	if test -f "${__object:?}/parameter/${param_name}"
+	if test -s "${__object:?}/parameter/${param_name}"
 	then
 		value=$(head -n 1 "${__object:?}/parameter/${param_name}")
 		opt_params="${opt_params} --${option_name}=\"${value}\""
