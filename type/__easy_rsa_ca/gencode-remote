@@ -2,6 +2,7 @@
 #
 # 2020 Marko Seric (marko.seric at ssrq-sds-fds.ch)
 # 2020 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
+# 2020 Beni Ruef (bernhard.ruef at ssrq-sds-fds.ch)
 #
 # This file is part of cdist.
 #
@@ -19,6 +20,16 @@
 # along with cdist. If not, see <http://www.gnu.org/licenses/>.
 #
 
+base_dir=$(cat "${__object:?}/parameter/dir")
+
+if test -f "${__object:?}/parameter/common-name"
+then
+	common_name=$(cat "${__object:?}/parameter/common-name")
+else
+	common_name=${__object_id:?}
+fi
+
+state_is=$(cat "${__object:?}/explorer/state")
 
 easyrsa_executable=
 os=$(cat "${__global:?}/explorer/os")
@@ -32,6 +43,20 @@ in
 		;;
 esac
 
+# Terminate early if state is "present"
+test "${state_is}" != 'present' || exit 0
+
+opt_params=
+# loop through mapping file
+while read param_name option_name
+do
+	if test -f "${__object:?}/parameter/${param_name}"
+	then
+		value=$(head -n 1 "${__object:?}/parameter/${param_name}")
+		opt_params="${opt_params} --${option_name}=\"${value}\""
+	fi
+done <"${__type:?}/files/param_mapping.txt"
+
 
 # Check validity of the supplied parameters
 # shellcheck source=/dev/null
@@ -39,22 +64,11 @@ esac
 
 check_parameter_validity_digest
 
-
-base_dir=$(cat "${__object:?}/parameter/dir")
-common_name=${__object_id:?}
-
-digest_parameter=
-if [ -f "${__object:?}/parameter/digest" ]
+if test -s "${__object:?}/parameter/digest"
 then
 	supplied_value=$(head -n 1 "${__object:?}/parameter/digest")
-	digest_parameter="--digest=\"${supplied_value}\""
+	opt_params="${opt_params} --digest=\"${supplied_value}\""
 fi
 
-command_to_execute="${easyrsa_executable} --batch --req-cn=\"${common_name}\" ${digest_parameter} build-ca nopass"
-
-state_is=$(cat "${__object:?}/explorer/state")
-if [ "${state_is}" = 'absent' ]
-then
-	echo "cd ${base_dir}"
-	echo "${command_to_execute}"
-fi
+echo "cd ${base_dir}"
+echo "${easyrsa_executable} --pki-dir=${base_dir}/pki --vars=${base_dir}/vars --req-cn='${common_name}' ${opt_params} --batch build-ca nopass"

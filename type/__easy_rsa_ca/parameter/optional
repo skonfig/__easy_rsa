@@ -1,1 +1,9 @@
+common-name
 digest
+key-size
+country
+province
+city
+org
+org-unit
+email
