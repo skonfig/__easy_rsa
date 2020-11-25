@@ -1,7 +1,7 @@
 city req-city
 country req-c
 email req-email
-key-size key-size
+key-size keysize
 org req-org
 org-unit req-ou
 province req-st
