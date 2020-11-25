@@ -1,0 +1,9 @@
+cert-expiration-days days
+city req-city
+country req-c
+email req-email
+key-size key-size
+org req-org
+org-unit req-ou
+province req-st
+use-algo use-algo

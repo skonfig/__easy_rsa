@@ -26,6 +26,13 @@ base_dir=$(cat "${__object:?}/parameter/dir")
 
 state_is=$(cat "${__object:?}/explorer/cert-presence")
 
+if test -s "${__object:?}/parameter/common-name"
+then
+	common_name=$(cat "${__object:?}/parameter/common-name")
+else
+	common_name=${__object_id:?}
+fi
+
 # Set the executable for easy-rsa
 easyrsa_executable=
 os=$(cat "${__global:?}/explorer/os")
@@ -58,10 +65,13 @@ in
 esac
 
 req_options=
-if test -s "${__object:?}/parameter/common-name"
-then
-	req_options="--req-cn='$(head -n1 "${__object:?}/parameter/common-name")'"
-fi
+while read -r param option
+do
+	test -s "${__object:?}/parameter/${param}" || continue
+
+	value=$(head -n 1 "${__object:?}/parameter/${param}")
+	req_options="${req_options} --${option}=$(quote "${value}")"
+done <"${__type:?}/files/param_mapping.txt"
 
 if test "${state_is}" != 'present'
 then
@@ -69,8 +79,8 @@ then
 
 	easyrsa_cmd="${easyrsa_executable} --pki-dir=$(quote "${base_dir}/pki") --vars=$(quote "${base_dir}/vars") --batch"
 
-	printf '%s %s gen-req %s nopass\n' \
-		"${easyrsa_cmd}" "${req_options# }" "$(quote "${__object_id:?}")"
+	printf '%s --req-cn=%s %s gen-req %s nopass\n' \
+		"${easyrsa_cmd}" "$(quote "${common_name}")" "${req_options# }" "$(quote "${__object_id:?}")"
 	printf '%s sign-req %s %s\n' \
 		"${easyrsa_cmd}" "${cert_type}" "$(quote "${__object_id:?}")"
 fi
