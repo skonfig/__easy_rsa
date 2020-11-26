@@ -48,6 +48,8 @@ state
         the certificate has been created and signed by the CA.
     valid
         like signed, but will renew the certificate if it expired.
+        *NB:* Easy-RSA will also generate a new private key when renewing the
+        certificate.
     revoked
         either the certificate is no defined, or will be revoked.
 

@@ -27,31 +27,12 @@ base_dir=$(cat "${__object:?}/parameter/dir")
 state_should=$(cat "${__object:?}/parameter/state")
 state_is=$(cat "${__object:?}/explorer/state")
 
-if test -s "${__object:?}/parameter/common-name"
-then
-	common_name=$(cat "${__object:?}/parameter/common-name")
-else
-	common_name=${__object_id:?}
-fi
-
 # Check validity of the supplied parameters
 # shellcheck source=/dev/null
 . "${__type:?}/files/check_parameter_validity.sh"
 
 check_parameter_validity_digest
 check_parameter_validity_usealgo
-
-## Check required parameters for sanity
-cert_type=$(cat "${__object:?}/parameter/cert-type")
-case ${cert_type}
-in
-	(server|client)
-		;;  # These two are okay
-	(*)
-		echo 'cert-type should be either "server" or "client".' >&2
-		exit 1
-		;;
-esac
 
 
 # NOTE: The following block is a bit of a "hack" to work around the fact that
@@ -75,61 +56,51 @@ then
 	state_is='absent'
 fi
 
-easyrsa_cmd="./easyrsa --pki-dir=$(quote "${base_dir}/pki") --vars=$(quote "${base_dir}/vars") --batch"
+# shellcheck source=/dev/null
+. "${__type:?}/files/easyrsa_cmds.sh"
 
 case ${state_should}
 in
-	(signed|valid)
-		if test "${state_is}" = 'valid' \
-			|| test "${state_should}" = 'signed' -a "${state_is}" = 'expired'
-		then
-			exit 0
-		fi
-
-		printf 'cd %s\n' "$(quote "${base_dir}")"
-
-		if test "${state_is}" = 'absent'
-		then
-			req_options=
-			while read -r param option
-			do
-				test -s "${__object:?}/parameter/${param}" || continue
-
-				value=$(head -n 1 "${__object:?}/parameter/${param}")
-				req_options="${req_options} --${option}=$(quote "${value}")"
-			done <"${__type:?}/files/param_mapping.txt"
-			unset param option value
-
-			printf '%s --req-cn=%s %s gen-req %s nopass\n' \
-				"${easyrsa_cmd}" "$(quote "${common_name}")" "${req_options# }" "$(quote "${__object_id:?}")"
-		fi
-
-		sign_options=
-		if test -s "${__object:?}/parameter/cert-expiration-days"
-		then
-			value=$(head -n 1 "${__object:?}/parameter/cert-expiration-days")
-			# shellcheck disable=SC2234
-			if ! (test $((value > 0)) -gt 0) 2>&-
-			then
-				printf 'Invalid --cert-expiration-days: %s\n' "${value}" >&2
-				printf 'Value must be a positive integer.\n' >&2
-				exit 1
-			fi
-			sign_options="${sign_options} --days=$(quote "${value}")"
-		fi
-		unset value
-
-		printf '%s %s sign-req %s %s\n' \
-			"${easyrsa_cmd}" "${sign_options# }" "${cert_type}" "$(quote "${__object_id:?}")"
+	(valid)
+		case ${state_is}
+		in
+			(absent|unsigned)
+				easyrsa_build_cmd
+				;;
+			(expired)
+				easyrsa_update_db_cmd
+				easyrsa_renew_cmd
+				;;
+			(valid)
+				# nothing to do
+				;;
+		esac
+		;;
+	(signed)
+		case ${state_is}
+		in
+			(absent|unsigned)
+				easyrsa_build_cmd
+				;;
+			(expired|valid)
+				# nothing to do
+				;;
+		esac
 		;;
 	(revoked)
-		if test "${state_is}" = 'absent'
-		then
-			exit 0
-		fi
-
-		printf 'cd %s\n' "$(quote "${base_dir}")"
-		printf '%s revoke %s \n' "${easyrsa_cmd}" "$(quote "${__object_id:?}")"
-		printf '%s gen-crl\n' "${easyrsa_cmd}"
+		case ${state_is}
+		in
+			(absent|unsigned)
+				# nothing to do
+				;;
+			(expired|valid)
+				easyrsa_revoke_cmd
+				;;
+		esac
+		;;
+	(*)
+		printf 'Invalid --state: %s\n' "${state_should}" >&2
+		printf 'Must be one of: valid, signed, revoked\n' >&2
+		exit 1
 		;;
 esac
