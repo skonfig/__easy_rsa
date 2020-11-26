@@ -1,3 +1,12 @@
-keysize
-use-algo
 cert-expiration-days
+common-name
+digest
+key-size
+state
+use-algo
+country
+province
+city
+org
+org-unit
+email
