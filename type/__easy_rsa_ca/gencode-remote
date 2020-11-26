@@ -33,18 +33,6 @@ fi
 
 state_is=$(cat "${__object:?}/explorer/state")
 
-easyrsa_executable=
-os=$(cat "${__global:?}/explorer/os")
-case ${os}
-in
-	(debian|devuan)
-		easyrsa_executable='/usr/share/easy-rsa/easyrsa'
-		;;
-	(*)
-		exit 1  # fail, OS whitelist should be in manifest
-		;;
-esac
-
 # Terminate early if state is "present"
 test "${state_is}" != 'present' || exit 0
 
@@ -73,6 +61,5 @@ then
 fi
 
 printf 'cd %s\n' "$(quote "${base_dir}")"
-printf '%s --pki-dir=%s --vars=%s --req-cn=%s %s --batch build-ca nopass\n' \
-	"${easyrsa_executable}" "$(quote "${base_dir}/pki")" \
-	"$(quote "${base_dir}/vars")" "$(quote "${common_name}")" "${opt_params# }"
+printf './easyrsa --pki-dir=%s --vars=%s --req-cn=%s %s --batch build-ca nopass\n' \
+	"$(quote "${base_dir}/pki")" "$(quote "${base_dir}/vars")" "$(quote "${common_name}")" "${opt_params# }"
