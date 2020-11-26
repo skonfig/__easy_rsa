@@ -1,8 +1,0 @@
-#!/bin/sh -e
-
-# Return "present" if there already a cert, "absent" otherwise
-
-base_dir=$(cat "${__object:?}/parameter/dir")
-pki_dir="${base_dir}/pki"
-
-test -f "${pki_dir}/issued/${__object_id:?}.crt" && echo 'present' || echo 'absent'
