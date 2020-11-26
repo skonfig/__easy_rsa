@@ -33,7 +33,3 @@ in
 		exit 1
 		;;
 esac
-
-# Ensure that pki-dir exists
-directory="/${__object_id:?}"
-__directory "${directory}" --owner root --group root --mode 0750

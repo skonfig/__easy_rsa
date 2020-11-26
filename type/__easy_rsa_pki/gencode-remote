@@ -23,32 +23,42 @@ quote() { printf "'%s'" "$(printf '%s' "$*" | sed -e "s/'/'\\\\''/g")"; }
 drop_awk_comments() { quote "$(sed '/^[[:blank:]]*#.*$/d;/^$/d' "$@")"; }
 quote_nonnum() { sed 's/^.*[^0-9].*$/"&"/;q' "$@"; }
 
-# Set the executable for easy-rsa
-easyrsa_executable=
 
 os=$(cat "${__global:?}/explorer/os")
-case ${os}
-in
-	(debian|devuan)
-		easyrsa_executable='/usr/share/easy-rsa/easyrsa'
-		;;
-	(*)
-		exit 1  # fail, OS whitelist should be in manifest
-		;;
-esac
-
-dir="/${__object_id:?}"
-vars_file="${dir}/vars"
 
 state_is=$(cat "${__object:?}/explorer/state")
 
+base_dir="/${__object_id:?}"
+vars_file="${base_dir}/vars"
+
 if test "${state_is}" = 'suspicious'
 then
-	printf "Directory %s exists, but doesn't look like a valid PKI.\n" "${dir}" >&2
+	printf "Directory %s exists, but doesn't look like a valid PKI.\n" "${base_dir}" >&2
 	printf 'Please clean it up manually and try again.\n'
 	exit 1
 fi
 
+
+################################################################################
+# Create base directory structure
+
+if test "${state_is}" = 'absent'
+then
+	case ${os}
+	in
+		(debian|devuan)
+			# Create base directory structure using Debian's make-cadir(1)
+			printf 'make-cadir %s\n' "$(quote "${base_dir}")"
+			;;
+		(*)
+			exit 1  # fail, OS whitelist should be in manifest
+			;;
+	esac
+fi
+
+
+################################################################################
+# Update vars file
 
 # Check validity of the supplied parameters
 # shellcheck source=/dev/null
@@ -58,16 +68,8 @@ check_parameter_validity_digest
 check_parameter_validity_usealgo
 check_parameter_validity_dnmode
 
-# Generate a new PKI if necessary
-if test "${state_is}" = 'absent'
-then
-	echo "cd ${dir}"
-	echo "${easyrsa_executable} init-pki"
-	# explicit vars file is better than implicit default vars
-	echo "cp /usr/share/easy-rsa/vars.example ${vars_file}"
-fi
-
-# Prepare the information to deremine if it needs to run, and act accordingly
+# Prepare the information to deremine if the vars file needs to be updated,
+# and act accordingly
 vars_and_values=$(
 	while read -r param variable
 	do
@@ -88,4 +90,14 @@ ${vars_and_values}
 EOF
 rm -f $(quote "${vars_file}.tmp")
 CODE
+fi
+
+
+################################################################################
+# Init PKI subdirectory
+
+if test "${state_is}" = 'absent'
+then
+	printf 'cd %s\n' "$(quote "${base_dir}")"
+	printf './easyrsa init-pki\n'
 fi
