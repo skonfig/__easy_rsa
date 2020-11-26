@@ -27,7 +27,7 @@ do
 	}
 done
 
-for file in serial index.txt index.txt.attr ca.crt private/ca.key
+for file in serial index.txt ca.crt private/ca.key
 do
 	test -f "${pki_dir}/${file}" || {
 		echo 'absent'
