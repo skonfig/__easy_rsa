@@ -85,7 +85,7 @@ command_to_execute="${easyrsa_executable} ${cert_options} ${build_subcommand} ${
 
 if test "${cert_already_present}" != 'present'
 then
-	pki_dir=$(cat "${__object:?}/parameter/pki-dir")
-	echo "cd ${pki_dir}"
+	base_dir=$(cat "${__object:?}/parameter/dir")
+	echo "cd ${base_dir}"
 	echo "${command_to_execute}"
 fi

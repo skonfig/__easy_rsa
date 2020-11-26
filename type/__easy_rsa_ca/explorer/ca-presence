@@ -2,9 +2,9 @@
 
 # Return "present" if the CA is present, "absent" otherwise.
 
-pki_dir=$(cat "${__object:?}/parameter/pki-dir")
+dir=$(cat "${__object:?}/parameter/dir")
 
-test -d "${pki_dir}" || {
+test -d "${dir}" || {
 	echo 'absent'
 	exit 0
 }
@@ -13,7 +13,7 @@ result='absent'
 
 for dir in issued certs_by_serial
 do
-	if [ -d "${pki_dir}/${dir}" ]
+	if [ -d "${dir}/pki/${dir}" ]
 	then
 		result='present'
 	fi
@@ -21,7 +21,7 @@ done
 
 for file in serial index.txt index.txt.attr ca.crt private/ca.key
 do
-	if [ -f "${pki_dir}/${file}" ]
+	if [ -f "${dir}/pki/${file}" ]
 	then
 		result='present'
 	fi

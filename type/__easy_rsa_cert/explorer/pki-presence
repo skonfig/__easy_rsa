@@ -4,17 +4,17 @@
 
 # TODO could something of this be deduplicated with the __easy_rsa_pki type?
 
-supplied_dir=$(cat "${__object:?}/parameter/pki-dir")
+base_dir=$(cat "${__object:?}/parameter/dir")
 
 # Do we even have a `pki`-directory?
-if [ ! -d "${supplied_dir}/pki" ]; then
+if [ ! -d "${base_dir}/pki" ]; then
 	echo "absent"
 	exit 0
 fi
 # pki-folder is present, check if everything is all right
 expected_folders="private reqs"
 for folder in ${expected_folders}; do
-	dir="${supplied_dir}/pki/${folder}"
+	dir="${base_dir}/pki/${folder}"
 	if [ ! -d "${dir}" ]; then
 		echo "Missing ${dir}" >&2
 		exit 1
@@ -22,7 +22,7 @@ for folder in ${expected_folders}; do
 done
 
 # Check for openssl config file
-openssl_easyrsa_conf_file="${supplied_dir}/pki/openssl-easyrsa.cnf"
+openssl_easyrsa_conf_file="${base_dir}/pki/openssl-easyrsa.cnf"
 if [ ! -f "${openssl_easyrsa_conf_file}" ]; then
 	echo "Missing ${openssl_easyrsa_conf_file}" >&2
 	exit 1

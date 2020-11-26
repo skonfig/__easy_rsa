@@ -42,7 +42,7 @@ esac
 check_parameter_validity_digest
 
 
-directory_with_pki=$(cat "${__object:?}/parameter/pki-dir")
+base_dir=$(cat "${__object:?}/parameter/dir")
 common_name=${__object_id:?}
 
 digest_parameter=
@@ -57,6 +57,6 @@ command_to_execute="${easyrsa_executable} --batch --req-cn=\"${common_name}\" ${
 ca_state=$(cat "${__object:?}/explorer/ca-presence")
 if [ "${ca_state}" = 'absent' ]
 then
-	echo "cd ${directory_with_pki}"
+	echo "cd ${base_dir}"
 	echo "${command_to_execute}"
 fi

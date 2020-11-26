@@ -2,8 +2,8 @@
 
 # Return "absent" if no CA present, "present" otherwise
 
-supplied_dir=$(cat "${__object:?}/parameter/pki-dir")
-pki_dir="${supplied_dir}/pki"
+base_dir=$(cat "${__object:?}/parameter/dir")
+pki_dir="${base_dir}/pki"
 
 result="absent"
 
