@@ -33,8 +33,30 @@ fi
 
 state_is=$(cat "${__object:?}/explorer/state")
 
-# Terminate early if state is "present"
-test "${state_is}" != 'present' || exit 0
+case ${state_is}
+in
+	(present)
+		exit 0
+		;;
+	(no-pki)
+		# NOTE: The following block is a bit of a "hack" to work around the fact
+		#       that requirements in cdist only work for code, but not for
+		#       explorers. Due to this, it could happen that the state explorer
+		#       executes before the PKI has been initialised.
+
+		# Before doing anything else, check if the pki directory is present.
+		cat <<-EOF
+		test -d $(quote "${base_dir}/pki") || {
+			echo 'Could not find pki directory in ${base_dir}.' >&2
+			echo 'Please make sure that __easy_rsa_pki${base_dir} is ran first.' >&2
+			exit 1
+		}
+		EOF
+		;;
+	(absent)
+		# continue below
+		;;
+esac
 
 opt_params=
 # loop through mapping file
