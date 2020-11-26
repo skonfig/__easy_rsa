@@ -58,6 +58,12 @@ in
 		;;
 esac
 
+# Check validity of the supplied parameters
+# shellcheck source=/dev/null
+. "${__type:?}/files/check_parameter_validity.sh"
+
+check_parameter_validity_digest
+
 opt_params=
 # loop through mapping file
 while read -r param option
@@ -68,19 +74,7 @@ do
 		opt_params="${opt_params} --${option}=$(quote "${value}")"
 	fi
 done <"${__type:?}/files/param_mapping.txt"
-
-
-# Check validity of the supplied parameters
-# shellcheck source=/dev/null
-. "${__type:?}/files/check_parameter_validity.sh"
-
-check_parameter_validity_digest
-
-if test -s "${__object:?}/parameter/digest"
-then
-	supplied_value=$(head -n 1 "${__object:?}/parameter/digest")
-	opt_params="${opt_params} --digest=$(quote "${supplied_value}")"
-fi
+unset param option
 
 printf 'cd %s\n' "$(quote "${base_dir}")"
 printf './easyrsa --pki-dir=%s --vars=%s --req-cn=%s %s --batch build-ca nopass\n' \

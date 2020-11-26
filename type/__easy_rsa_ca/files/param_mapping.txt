@@ -1,5 +1,6 @@
 city req-city
 country req-c
+digest digest
 email req-email
 key-size keysize
 org req-org
