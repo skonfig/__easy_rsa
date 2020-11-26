@@ -1,4 +1,3 @@
-cert-expiration-days days
 city req-city
 country req-c
 digest digest

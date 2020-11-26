@@ -59,6 +59,22 @@ do
 	value=$(head -n 1 "${__object:?}/parameter/${param}")
 	req_options="${req_options} --${option}=$(quote "${value}")"
 done <"${__type:?}/files/param_mapping.txt"
+unset param option value
+
+sign_options=
+if test -s "${__object:?}/parameter/cert-expiration-days"
+then
+	value=$(head -n 1 "${__object:?}/parameter/cert-expiration-days")
+	# shellcheck disable=SC2234
+	if ! (test $((value > 0)) -gt 0) 2>&-
+	then
+		printf 'Invalid --cert-expiration-days: %s\n' "${value}" >&2
+		printf 'Value must be a positive integer.\n' >&2
+		exit 1
+	fi
+	sign_options="${sign_options} --days=$(quote "${value}")"
+fi
+unset value
 
 if test "${state_is}" != 'present'
 then
@@ -68,6 +84,6 @@ then
 
 	printf '%s --req-cn=%s %s gen-req %s nopass\n' \
 		"${easyrsa_cmd}" "$(quote "${common_name}")" "${req_options# }" "$(quote "${__object_id:?}")"
-	printf '%s sign-req %s %s\n' \
-		"${easyrsa_cmd}" "${cert_type}" "$(quote "${__object_id:?}")"
+	printf '%s %s sign-req %s %s\n' \
+		"${easyrsa_cmd}" "${sign_options# }" "${cert_type}" "$(quote "${__object_id:?}")"
 fi
