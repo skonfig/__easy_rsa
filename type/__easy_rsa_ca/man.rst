@@ -88,9 +88,9 @@ SEE ALSO
 
 AUTHORS
 -------
-Marko Seric <marko.seric--@--ssrq-sds-fds.ch>
-Beni Ruef <bernhard.ruef--@--ssrq-sds-fds.ch>
-Dennis Camera <dennis.camera--@--ssrq-sds-fds.ch>
+| Marko Seric <marko.seric--@--ssrq-sds-fds.ch>
+| Beni Ruef <bernhard.ruef--@--ssrq-sds-fds.ch>
+| Dennis Camera <dennis.camera--@--ssrq-sds-fds.ch>
 
 
 COPYING
