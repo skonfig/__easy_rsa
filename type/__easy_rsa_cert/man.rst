@@ -54,16 +54,6 @@ state
         either the certificate is no defined, or will be revoked.
 
     Default is: ``signed``.
-use-algo
-    The algorithm to use.
-    Possible values:
-
-    rsa
-        RSA mode.
-    ec
-        Elliptic Curve Cryptography mode.
-
-    Default is: ``rsa``.
 
 
 The following optional parameters correspond to the default values in
