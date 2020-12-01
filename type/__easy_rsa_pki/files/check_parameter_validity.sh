@@ -40,7 +40,17 @@ fail_parameter_value() {
 # }
 
 check_parameter_validity_digest() {
-	parameter_name='digest'
+	: "${__type:?}"
+	case ${__type##*/}
+	in
+		(*_pki)
+			parameter_name='default-digest'
+			;;
+		(*)
+			parameter_name='digest'
+			;;
+	esac
+
 	if [ -f "${__object:?}/parameter/${parameter_name}" ]
 	then
 		supplied_value=$(cat "${__object:?}/parameter/${parameter_name}")

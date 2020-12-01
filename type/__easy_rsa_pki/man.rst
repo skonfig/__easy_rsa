@@ -114,9 +114,9 @@ EXAMPLES
     # Ensure existence of a PKI in directory /etc/easy-rsa with defaults
     __easy_rsa_pki /etc/easy-rsa \
         --use-algo rsa \
-        --default-keysize 119 \
+        --default-keysize 4096 \
         --dn-mode org \
-        --digest sha512 \
+        --default-digest sha512 \
         --default-country CH \
         --default-province SG \
         --default-city Werdenberg \

@@ -2,6 +2,7 @@ ca-expire-days EASYRSA_CA_EXPIRE
 cert-expire-days EASYRSA_CERT_EXPIRE
 cert-renewal-allowed-days EASYRSA_CERT_RENEW
 crl-publish-days EASYRSA_CRL_DAYS
+default-digest EASYRSA_DIGEST
 default-ec-curve EASYRSA_CURVE
 default-keysize EASYRSA_KEY_SIZE
 default-city EASYRSA_REQ_CITY
@@ -10,6 +11,5 @@ default-email EASYRSA_REQ_EMAIL
 default-org EASYRSA_REQ_ORG
 default-ou EASYRSA_REQ_OU
 default-province EASYRSA_REQ_PROVINCE
-digest EASYRSA_DIGEST
 dn-mode EASYRSA_DN
 use-algo EASYRSA_ALGO
