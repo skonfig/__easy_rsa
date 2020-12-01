@@ -34,13 +34,13 @@ OPTIONAL PARAMETERS
 cert-expiration-days
     Days until expiration of the certificate.
 common-name
-    The Common Name (CN) for this CA.
+    The Common Name (CN) for this certficiate.
     Defaults to ``__object_id``.
 digest
-    The digest to use for the CA.
+    The digest to use for this certificate.
     Valid choices include: md5, sha1, sha256, sha224, sha384, sha512
 key-size
-    The keysize to use for the request.
+    The key size to use for the request.
 state
     Possible values:
 
