@@ -1,1 +1,0 @@
-../../__easy_rsa_pki/files/check_parameter_validity.sh

@@ -27,14 +27,6 @@ base_dir=$(cat "${__object:?}/parameter/dir")
 state_should=$(cat "${__object:?}/parameter/state")
 state_is=$(cat "${__object:?}/explorer/state")
 
-# Check validity of the supplied parameters
-# shellcheck source=/dev/null
-. "${__type:?}/files/check_parameter_validity.sh"
-
-check_parameter_validity_digest
-check_parameter_validity_usealgo
-
-
 # NOTE: The following block is a bit of a "hack" to work around the fact that
 #       requirements in cdist only work for code, but not for explorers. Due to
 #       this, it could happen that the state explorer executes before the PKI
