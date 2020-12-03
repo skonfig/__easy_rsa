@@ -60,7 +60,7 @@ fi
 ################################################################################
 # Update vars file
 
-# Prepare the information to deremine if the vars file needs to be updated,
+# Prepare the information to determine if the vars file needs to be updated,
 # and act accordingly
 vars_and_values=$(
 	while read -r param variable
