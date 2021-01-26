@@ -1,9 +1,9 @@
-cdist-type__easy_rsa_pki(7)
-===========================
+cdist-type__ssrq_easy_rsa_pki(7)
+================================
 
 NAME
 ----
-cdist-type__easy_rsa_pki - Install an easy-rsa PKI
+cdist-type__ssrq_easy_rsa_pki - Install an easy-rsa PKI
 
 
 DESCRIPTION
@@ -17,10 +17,10 @@ The ``EASYRSA_PKI`` will be located at ``${__object_id}/pki``.
 The optional parameters will have an effect on the ``vars`` file.
 
 This cdist type does not build an Easy-RSA CA (for this,
-see :strong:`cdist-type__easy_rsa_ca`\ (7)).
+see :strong:`cdist-type__ssrq_easy_rsa_ca`\ (7)).
 
 One Easy-RSA PKI can hold at most one CA, so it is necessary to
-use this type once for each usage of ``__easy_rsa_ca``.
+use this type once for each usage of ``__ssrq_easy_rsa_ca``.
 
 REQUIRED PARAMETERS
 -------------------
@@ -109,10 +109,10 @@ EXAMPLES
 .. code-block:: sh
 
     # Ensure existence of an Easy-RSA PKI structure in directory /etc/easy-rsa
-    __easy_rsa_pki /etc/easy-rsa
+    __ssrq_easy_rsa_pki /etc/easy-rsa
 
     # Ensure existence of a PKI in directory /etc/easy-rsa with defaults
-    __easy_rsa_pki /etc/easy-rsa \
+    __ssrq_easy_rsa_pki /etc/easy-rsa \
         --use-algo rsa \
         --default-keysize 4096 \
         --dn-mode org \
@@ -127,8 +127,8 @@ EXAMPLES
 
 SEE ALSO
 --------
-:strong:`cdist-type__easy_rsa_ca`\ (7),
-:strong:`cdist-type__easy_rsa_cert`\ (7)
+:strong:`cdist-type__ssrq_easy_rsa_ca`\ (7),
+:strong:`cdist-type__ssrq_easy_rsa_cert`\ (7)
 
 
 AUTHORS

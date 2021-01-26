@@ -38,7 +38,7 @@ then
 	cat <<-EOF
 	test -d $(quote "${base_dir}/pki") || {
 		echo 'Could not find pki directory in ${base_dir}.' >&2
-		echo 'Please make sure that __easy_rsa_pki${base_dir} is ran first.' >&2
+		echo 'Please make sure that __ssrq_easy_rsa_pki${base_dir} is ran first.' >&2
 		exit 1
 	}
 	EOF

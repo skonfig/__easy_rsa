@@ -1,9 +1,9 @@
-cdist-type__easy_rsa_ca(7)
-==========================
+cdist-type__ssrq_easy_rsa_ca(7)
+===============================
 
 NAME
 ----
-cdist-type__easy_rsa_ca - Build an Easy-RSA Certificate Authority (CA).
+cdist-type__ssrq_easy_rsa_ca - Build an Easy-RSA Certificate Authority (CA).
 
 
 DESCRIPTION
@@ -11,11 +11,11 @@ DESCRIPTION
 This type sets up an Easy-RSA CA in the directory specified with the ``--dir``
 parameter.
 
-As a prerequisite the :strong:`cdist-type__easy_rsa_pki`\ (7) must have
+As a prerequisite the :strong:`cdist-type__ssrq_easy_rsa_pki`\ (7) must have
 created a PKI structure in said directory beforehand.
 
 To have multiple CAs it is required to create one PKI directory structure (using
-:strong:`cdist-type__easy_rsa_pki`\ (7)) for each.
+:strong:`cdist-type__ssrq_easy_rsa_pki`\ (7)) for each.
 
 The optional parameters have no effect on an already existing CA.
 
@@ -29,7 +29,7 @@ REQUIRED PARAMETERS
 -------------------
 dir
     Full path of the corresponding Easy-RSA PKI structure (as created by
-    :strong:`cdist-type__easy_rsa_pki`\ (7)).
+    :strong:`cdist-type__ssrq_easy_rsa_pki`\ (7)).
 
 
 OPTIONAL PARAMETERS
@@ -72,18 +72,18 @@ EXAMPLES
 .. code-block:: sh
 
     # Set up a CA with common name "Example_CA"
-    require=__easy_rsa_pki/etc/easy-rsa \
-    __easy_rsa_ca Example_CA --dir /etc/easy-rsa
+    require=__ssrq_easy_rsa_pki/etc/easy-rsa \
+    __ssrq_easy_rsa_ca Example_CA --dir /etc/easy-rsa
 
     # Set up a CY with a space in its common name
-    require=__easy_rsa_pki/etc/easy-rsa \
-    __easy_rsa_ca Example_CA --dir /etc/easy-rsa --common-name 'My Example CA'
+    require=__ssrq_easy_rsa_pki/etc/easy-rsa \
+    __ssrq_easy_rsa_ca Example_CA --dir /etc/easy-rsa --common-name 'My Example CA'
 
 
 SEE ALSO
 --------
-:strong:`cdist-type__easy_rsa_pki`\ (7),
-:strong:`cdist-type__easy_rsa_cert`\ (7)
+:strong:`cdist-type__ssrq_easy_rsa_pki`\ (7),
+:strong:`cdist-type__ssrq_easy_rsa_cert`\ (7)
 
 
 AUTHORS

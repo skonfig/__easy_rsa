@@ -1,9 +1,9 @@
-cdist-type__easy_rsa_cert(7)
-============================
+cdist-type__ssrq_easy_rsa_cert(7)
+=================================
 
 NAME
 ----
-cdist-type__easy_rsa_cert - Manage a server or client key pair.
+cdist-type__ssrq_easy_rsa_cert - Manage a server or client key pair.
 
 
 DESCRIPTION
@@ -11,8 +11,8 @@ DESCRIPTION
 This type manages private keys and certificates using Easy-RSA.
 The certificate type (server or client) can be defined using ``--cert-type``.
 
-As a prerequisite the :strong:`cdist-type__easy_rsa_pki`\ (7) and
-:strong:`cdist-type__easy_rsa_ca`\ (7) must have created a PKI structure and
+As a prerequisite the :strong:`cdist-type__ssrq_easy_rsa_pki`\ (7) and
+:strong:`cdist-type__ssrq_easy_rsa_ca`\ (7) must have created a PKI structure and
 Certificate Authority (CA) in said directory beforehand.
 
 **NB:** This type will neither update an existing certificate's subject nor
@@ -26,7 +26,7 @@ cert-type
     The type of the certificate, either ``server`` or ``client``.
 dir
     Full path of the corresponding Easy-RSA PKI structure (as created by
-    :strong:`cdist-type__easy_rsa_pki`\ (7)).
+    :strong:`cdist-type__ssrq_easy_rsa_pki`\ (7)).
 
 
 OPTIONAL PARAMETERS
@@ -83,20 +83,20 @@ EXAMPLES
 
 .. code-block:: sh
     # server certificate
-    __easy_rsa_cert openvpn-server \
+    __ssrq_easy_rsa_cert openvpn-server \
         --dir /etc/easy-rsa \
         --cert-type server
 
     # client certificate
-    __easy_rsa_cert janedoe \
+    __ssrq_easy_rsa_cert janedoe \
         --dir /etc/easy-rsa \
         --cert-type client
 
 
 SEE ALSO
 --------
-:strong:`cdist-type__easy_rsa_pki`\ (7),
-:strong:`cdist-type__easy_rsa_ca`\ (7)
+:strong:`cdist-type__ssrq_easy_rsa_pki`\ (7),
+:strong:`cdist-type__ssrq_easy_rsa_ca`\ (7)
 
 
 AUTHORS
