@@ -10,6 +10,7 @@
 base_dir=$(cat "${__object:?}/parameter/dir")
 pki_dir="${base_dir}/pki"
 
+# shellcheck disable=SC2015
 test -f "${base_dir}/vars" && test -d "${pki_dir}"|| {
 	echo 'no-pki'
 	exit 0

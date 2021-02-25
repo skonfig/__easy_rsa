@@ -28,6 +28,7 @@ in
 		__package easy-rsa --state present
 		;;
 	(*)
+		: "${__type:?}"  # make shellcheck happy
 		printf "Your operating system (%s) is currently not supported by this type (%s)\n" "${os}" "${__type##*/}" >&2
 		printf "Please contribute an implementation for it if you can.\n" >&2
 		exit 1
