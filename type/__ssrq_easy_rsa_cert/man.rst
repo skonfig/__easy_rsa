@@ -82,15 +82,16 @@ EXAMPLES
 --------
 
 .. code-block:: sh
-    # server certificate
-    __ssrq_easy_rsa_cert openvpn-server \
-        --dir /etc/easy-rsa \
-        --cert-type server
 
-    # client certificate
-    __ssrq_easy_rsa_cert janedoe \
-        --dir /etc/easy-rsa \
-        --cert-type client
+   # server certificate
+   __ssrq_easy_rsa_cert openvpn-server \
+      --dir /etc/easy-rsa \
+      --cert-type server
+
+   # client certificate
+   __ssrq_easy_rsa_cert janedoe \
+      --dir /etc/easy-rsa \
+      --cert-type client
 
 
 SEE ALSO
