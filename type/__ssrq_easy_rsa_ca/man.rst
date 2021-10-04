@@ -34,6 +34,10 @@ dir
 
 OPTIONAL PARAMETERS
 -------------------
+auto-sign-with
+    If ``--type sub`` is set and the parent CA is also managed using easy-rsa on
+    the same machine, this CA will be automatically signed with the CA defined
+    in the "value"'s directory.
 common-name
     The Common Name (CN) for this CA.
     Defaults to ``__object_id``.
@@ -41,7 +45,26 @@ digest
     The digest to use for the CA.
     Valid choices include: md5, sha1, sha256, sha224, sha384, sha512
 key-size
-    value for EASYRSA_KEY_SIZE (keysize in bits to generate)
+    value for ``EASYRSA_KEY_SIZE`` (keysize in bits to generate)
+type
+    The type of CA to create.
+
+    Acceptable values:
+
+    root
+        Create a self-signed root CA. (probably what you want)
+    sub
+        Create a sub/intermediate CA.
+
+        | The CA will not be signed automatically.
+
+        | If the parent CA is also managed using this type on the same machine,
+          the sub CA can be automatically signed by using the
+          ``--auto-sign-with`` parameter.
+        | Otherwise this type will create a CSR to be signed by the parent CA
+          and installed to this machine manually.
+
+    Defaults to: ``root``
 
 
 The following optional parameters correspond to the default values in
@@ -75,9 +98,17 @@ EXAMPLES
     require=__ssrq_easy_rsa_pki/etc/easy-rsa \
     __ssrq_easy_rsa_ca Example_CA --dir /etc/easy-rsa
 
-    # Set up a CY with a space in its common name
+    # Set up a CA with a space in its common name
     require=__ssrq_easy_rsa_pki/etc/easy-rsa \
     __ssrq_easy_rsa_ca Example_CA --dir /etc/easy-rsa --common-name 'My Example CA'
+
+    # Set up a sub CA (and sign it using another CA)
+    require=__ssrq_easy_rsa_pki/etc/easy-rsa/sub \
+    __ssrq_easy_rsa_ca Example_Sub_CA \
+        --dir /etc/easy-rsa/sub \
+        --common-name 'My Sub CA' \
+        --type sub \
+        --auto-sign-with /etc/easy-rsa
 
 
 SEE ALSO

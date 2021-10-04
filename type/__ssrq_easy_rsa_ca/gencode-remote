@@ -27,6 +27,8 @@ state_is=$(cat "${__object:?}/explorer/state")
 
 base_dir=$(cat "${__object:?}/parameter/dir")
 
+ca_type=$(cat "${__object:?}/parameter/type")
+
 if test -s "${__object:?}/parameter/common-name"
 then
 	common_name=$(cat "${__object:?}/parameter/common-name")
@@ -82,10 +84,47 @@ do
 done <"${__type:?}/files/param_mapping.txt"
 unset param option
 
+
+cmd_opts=' nopass'
+
+case ${ca_type}
+in
+	(root)
+		if test -f "${__object:?}/parameter/auto-sign-with"
+		then
+			echo 'The parameter --auto-sign-with can only be used together with --type sub.' >&2
+			exit 1
+		fi
+		;;
+	(sub) cmd_opts="${cmd_opts-}${cmd_opts:+ }subca" ;;
+	(*)
+		printf 'Invalid --type: %s\n' "${ca_type}" >&2
+		exit 1
+		;;
+esac
+
 printf 'cd %s || exit 1\n' "$(quote "${base_dir}")"
-printf '%s --pki-dir=%s --vars=%s --req-cn=%s %s --batch build-ca nopass\n' \
+printf '%s --pki-dir=%s --vars=%s --req-cn=%s %s --batch build-ca%s\n' \
 	"${easyrsa_bin}" \
 	"$(quote "${base_dir}/pki")" \
 	"$(quote "${base_dir}/vars")" \
 	"$(quote "${common_name}")" \
-	"${opt_params# }"
+	"${opt_params# }" \
+	"${cmd_opts}"
+
+if test "${ca_type}" = 'sub' -a -f "${__object:?}/parameter/auto-sign-with"
+then
+	parent_ca=$(cat "${__object:?}/parameter/auto-sign-with")
+	easyrsa_parent="${easyrsa_bin:?} --pki-dir=$(quote "${parent_ca}/pki") --vars=$(quote "${parent_ca}/vars") --batch"
+
+	cat <<-EOF
+
+	# Sign sub CA
+	days=\$(set_var(){ export "\$1=\$2"; }; EASYRSA_CALLER=1 . $(quote "${base_dir:?}/vars"); echo "\${EASYRSA_CA_EXPIRE:-3650}")
+
+	cd $(quote "${parent_ca}") \\
+	&& ${easyrsa_parent} import-req $(quote "${base_dir}/pki/reqs/ca.req") $(quote "${__object_id:?}") \\
+	&& ${easyrsa_parent} --days=\$((days)) sign-req ca $(quote "${__object_id:?}") \\
+	&& cat $(quote "${parent_ca}/pki/issued/${__object_id:?}.crt") >$(quote "${base_dir}/pki/ca.crt")
+	EOF
+fi

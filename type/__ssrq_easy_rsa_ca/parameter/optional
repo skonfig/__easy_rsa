@@ -1,3 +1,5 @@
+type
+auto-sign-with
 common-name
 digest
 key-size
