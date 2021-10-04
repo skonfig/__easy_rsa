@@ -25,6 +25,15 @@ in
 	(devuan|debian)
 		__package easy-rsa --state present
 		;;
+	(openwrt)
+		__package_opkg openvpn-easy-rsa --state present
+
+		if test -f "${__object:?}/parameter/background"
+		then
+			# nohup is required for --background to work
+			__package_opkg coreutils-nohup --state present
+		fi
+		;;
 	(*)
 		: "${__type:?}"  # make shellcheck happy
 		printf "Your operating system (%s) is currently not supported by this type (%s)\n" "${os}" "${__type##*/}" >&2

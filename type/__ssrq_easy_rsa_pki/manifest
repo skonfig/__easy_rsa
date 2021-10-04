@@ -1,7 +1,7 @@
 #!/bin/sh -e
 #
 # 2020 Marko Seric (marko.seric at ssrq-sds-fds.ch)
-# 2020 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
+# 2020-2021 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
 #
 # This file is part of cdist.
 #
@@ -26,6 +26,10 @@ in
 	(debian|devuan)
 		# Ensure that easy-rsa is installed
 		__package easy-rsa --state present
+		;;
+	(openwrt)
+		# Ensure that easy-rsa is installed
+		__package_opkg openvpn-easy-rsa --state present
 		;;
 	(*)
 		: "${__type:?}"  # make shellcheck happy

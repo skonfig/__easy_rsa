@@ -1,5 +1,7 @@
 # shellcheck shell=sh
 
+os=$(cat "${__global:?}/explorer/os")
+
 if test -s "${__object:?}/parameter/common-name"
 then
 	common_name=$(cat "${__object:?}/parameter/common-name")
@@ -8,6 +10,15 @@ else
 fi
 
 cert_type=$(cat "${__object:?}/parameter/cert-type")
+
+case ${os}
+in
+	(devuan|debian) easyrsa_bin='./easyrsa' ;;
+	(*) easyrsa_bin='easyrsa' ;;
+esac
+
+easyrsa_base_cmd="${easyrsa_bin} --pki-dir=$(quote "${base_dir:?}/pki") --vars=$(quote "${base_dir:?}/vars") --batch"
+
 
 easyrsa_request_options() (
 	while read -r param option
@@ -38,11 +49,9 @@ easyrsa_sign_options() (
 	printf '\n'
 )
 
-easyrsa_base_cmd="./easyrsa --pki-dir=$(quote "${base_dir:?}/pki") --vars=$(quote "${base_dir:?}/vars") --batch"
-
 cd_basedir_cmd() {
 	${cd_done:-false} || {
-		printf 'cd %s\n' "$(quote "${base_dir:?}")"
+		printf 'cd %s || exit 1\n' "$(quote "${base_dir:?}")"
 		cd_done=true
 	}
 }

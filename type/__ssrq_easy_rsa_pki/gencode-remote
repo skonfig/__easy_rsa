@@ -1,7 +1,7 @@
 #!/bin/sh -e
 #
 # 2020 Marko Seric (marko.seric@ssrq-sds-fds.ch)
-# 2020 Dennis Camera (dennis camera at ssrq-sds-fds.ch)
+# 2020-2021 Dennis Camera (dennis camera at ssrq-sds-fds.ch)
 #
 # This file is part of cdist.
 #
@@ -47,8 +47,30 @@ then
 	case ${os}
 	in
 		(debian|devuan)
+			easyrsa_bin='./easyrsa'
+
 			# Create base directory structure using Debian's make-cadir(1)
 			printf 'make-cadir %s\n' "$(quote "${base_dir}")"
+			;;
+		(openwrt)
+			easyrsa_bin='easyrsa'
+
+			# Create base directory structure
+			printf 'test -d %s || mkdir %s\n' \
+				"$(quote "${base_dir}")" "$(quote "${base_dir}")"
+
+			for _file in vars openssl-easyrsa.cnf
+			do
+				# NOTE: /usr/lib/easy-rsa/* actually links into /etc/easy-rsa
+				printf 'cat %s >%s\n' \
+					"$(quote "/usr/lib/easy-rsa/${_file}")" \
+					"$(quote "${base_dir}/${_file}")"
+			done
+			unset _file
+
+			printf 'ln -s %s %s\n' \
+				"$(quote "/usr/lib/easy-rsa/x509-types")" \
+				"$(quote "${base_dir}/x509-types")"
 			;;
 		(*)
 			exit 1  # fail, OS whitelist should be in manifest
@@ -90,6 +112,7 @@ fi
 
 if test "${state_is}" = 'absent'
 then
-	printf 'cd %s\n' "$(quote "${base_dir}")"
-	printf './easyrsa init-pki\n'
+	# NOTE: init-pki creates a pki subfolder in the current working directory!
+	printf 'cd %s || exit 1\n' "$(quote "${base_dir}")"
+	printf '%s --batch init-pki\n' "${easyrsa_bin}"
 fi

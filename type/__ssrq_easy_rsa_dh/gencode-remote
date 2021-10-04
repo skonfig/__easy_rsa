@@ -20,10 +20,19 @@
 
 quote() { printf "'%s'" "$(printf '%s' "$*" | sed -e "s/'/'\\\\''/g")"; }
 
+os=$(cat "${__global:?}/explorer/os")
+
 base_dir=/${__object_id:?}
 
 state_should=$(cat "${__object:?}/parameter/state")
 state_is=$(cat "${__object:?}/explorer/state")
+
+case ${os}
+in
+	(devuan|debian) easyrsa_bin='./easyrsa' ;;
+	(*) easyrsa_bin='easyrsa' ;;
+esac
+
 
 if test "${state_should}" = "${state_is}"
 then
@@ -52,12 +61,12 @@ then
 	state_is='absent'
 fi
 
-easyrsa_base_cmd="./easyrsa --pki-dir=$(quote "${base_dir:?}/pki") --vars=$(quote "${base_dir:?}/vars") --batch"
+easyrsa_base_cmd="${easyrsa_bin} --pki-dir=$(quote "${base_dir:?}/pki") --vars=$(quote "${base_dir:?}/vars") --batch"
 
 case ${state_should}
 in
 	(present)
-		printf 'cd %s\n' "$(quote "${base_dir:?}")"
+		printf 'cd %s || exit 1\n' "$(quote "${base_dir:?}")"
 
 		output_redir='>/dev/null'
 		if test -f "${__object:?}/parameter/background"
