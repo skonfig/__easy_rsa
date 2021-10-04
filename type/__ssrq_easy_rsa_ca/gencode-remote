@@ -42,8 +42,13 @@ esac
 
 case ${state_is}
 in
-	(present)
+	(valid)
 		exit 0
+		;;
+	(expired)
+		printf 'The certificate authority "%s" is expired.\n' "${common_name}" >&2
+		printf 'Please delete (or move away) the directory "%s" so that a fresh CA can be generated.\n' "${base_dir}" >&2
+		exit 1
 		;;
 	(no-pki)
 		# NOTE: The following block is a bit of a "hack" to work around the fact

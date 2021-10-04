@@ -12,7 +12,7 @@ pki_dir="${base_dir}/pki"
 # Check if PKI is present
 
 # shellcheck disable=SC2015
-test -f "${base_dir}/vars" && test -d "${pki_dir}"|| {
+test -f "${base_dir}/vars" && test -d "${pki_dir}" || {
 	echo 'no-pki'
 	exit 0
 }
@@ -36,4 +36,12 @@ do
 	}
 done
 
-echo 'present'
+if test -f "${pki_dir}/ca.crt"
+then
+	if openssl x509 -noout -in "${pki_dir}/ca.crt" -checkend 0 >/dev/null
+	then
+		echo 'valid'
+	else
+		echo 'expired'
+	fi
+fi
