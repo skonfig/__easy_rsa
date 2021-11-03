@@ -122,9 +122,14 @@ then
 	# Sign sub CA
 	days=\$(set_var(){ export "\$1=\$2"; }; EASYRSA_CALLER=1 . $(quote "${base_dir:?}/vars"); echo "\${EASYRSA_CA_EXPIRE:-3650}")
 
-	cd $(quote "${parent_ca}") \\
-	&& ${easyrsa_parent} import-req $(quote "${base_dir}/pki/reqs/ca.req") $(quote "${__object_id:?}") \\
-	&& ${easyrsa_parent} --days=\$((days)) sign-req ca $(quote "${__object_id:?}") \\
-	&& cat $(quote "${parent_ca}/pki/issued/${__object_id:?}.crt") >$(quote "${base_dir}/pki/ca.crt")
+	set -e
+
+	cd $(quote "${parent_ca}")
+
+	${easyrsa_parent} import-req $(quote "${base_dir}/pki/reqs/ca.req") $(quote "${__object_id:?}") \\
+	&& ${easyrsa_parent} --days=\$((days)) sign-req ca $(quote "${__object_id:?}")
+
+	cat $(quote "${parent_ca}/pki/issued/${__object_id:?}.crt") >$(quote "${base_dir}/pki/ca.crt")
+	cat $(quote "${parent_ca}/pki/ca.crt") $(quote "${base_dir}/pki/ca.crt") >$(quote "${base_dir}/pki/chain.pem")
 	EOF
 fi
