@@ -33,9 +33,6 @@ OPTIONAL PARAMETERS
 -------------------
 cert-expiration-days
     Days until expiration of the certificate.
-common-name
-    The Common Name (CN) for this certficiate.
-    Defaults to ``__object_id``.
 digest
     The digest to use for this certificate.
     Valid choices include: md5, sha1, sha256, sha224, sha384, sha512
@@ -109,7 +106,7 @@ AUTHORS
 
 COPYING
 -------
-Copyright \(C) 2020 the AUTHORS. You can redistribute it
+Copyright \(C) 2020-2023 the AUTHORS. You can redistribute it
 and/or modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.

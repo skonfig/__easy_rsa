@@ -1,5 +1,4 @@
 cert-expiration-days
-common-name
 digest
 key-size
 state
