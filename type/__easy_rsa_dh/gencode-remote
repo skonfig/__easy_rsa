@@ -1,0 +1,88 @@
+#!/bin/sh -e
+#
+# 2021 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
+#
+# This file is part of the skonfig set __easy_rsa.
+#
+# This set is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This set is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this set. If not, see <http://www.gnu.org/licenses/>.
+#
+
+quote() { printf "'%s'" "$(printf '%s' "$*" | sed -e "s/'/'\\\\''/g")"; }
+
+os=$(cat "${__global:?}/explorer/os")
+
+base_dir=/${__object_id:?}
+
+state_should=$(cat "${__object:?}/parameter/state")
+state_is=$(cat "${__object:?}/explorer/state")
+
+case ${os}
+in
+	(devuan|debian) easyrsa_bin='./easyrsa' ;;
+	(*) easyrsa_bin='easyrsa' ;;
+esac
+
+
+if test "${state_should}" = "${state_is}"
+then
+	exit 0
+fi
+
+
+# NOTE: The following block is a bit of a "hack" to work around the fact that
+#       requirements in cdist only work for code, but not for explorers. Due to
+#       this, it could happen that the state explorer executes before the PKI
+#       has been initialised.
+if test "${state_is}" = 'no-pki'
+then
+	# Before doing anything else, check if the pki directory has been
+	# initialised in the meantime if the explorer didn't find it.
+	cat <<-EOF
+	test -d $(quote "${base_dir}/pki") || {
+		echo 'Could not find pki directory in ${base_dir}.' >&2
+		echo 'Please make sure that __easy_rsa_pki${base_dir} is ran first.' >&2
+		exit 1
+	}
+	EOF
+
+	# NOTE: If the PKI has been freshly initialised, the cert can't have been
+	#       generated previously, so it must be 'absent'.
+	state_is='absent'
+fi
+
+easyrsa_base_cmd="${easyrsa_bin} --pki-dir=$(quote "${base_dir:?}/pki") --vars=$(quote "${base_dir:?}/vars") --batch"
+
+case ${state_should}
+in
+	(present)
+		printf 'cd %s || exit 1\n' "$(quote "${base_dir:?}")"
+
+		output_redir='>/dev/null'
+		if test -f "${__object:?}/parameter/background"
+		then
+			echo 'command -v nohup >/dev/null || { echo "nohup: command not found"; exit 1; }'
+			easyrsa_base_cmd="nohup ${easyrsa_base_cmd}"
+			output_redir="${output_redir} 2>&1 &"
+		fi
+		printf '%s gen-dh %s\n' "${easyrsa_base_cmd}" "${output_redir}"
+		;;
+	(absent)
+		printf 'rm -f %s\n' "$(quote "${base_dir}/pki/dh.pem")"
+		;;
+	(*)
+		printf 'Invalid --state: %s\n' "${state_should}" >&2
+		printf 'Must be one of: present, absent\n' >&2
+		exit 1
+		;;
+esac

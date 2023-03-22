@@ -1,0 +1,47 @@
+#!/bin/sh -e
+#
+# Prints the current state of the CA:
+# - "present" if the CA is present;
+# - "absent" if the PKI is initialised but the CA has not been created;
+# - "no-pki" if the PKI directory is missing.
+#
+
+base_dir=$(cat "${__object:?}/parameter/dir")
+pki_dir="${base_dir}/pki"
+
+# Check if PKI is present
+
+# shellcheck disable=SC2015
+test -f "${base_dir}/vars" && test -d "${pki_dir}" || {
+	echo 'no-pki'
+	exit 0
+}
+
+
+# Check directories and files created by build-ca
+
+for dir in issued certs_by_serial
+do
+	test -d "${pki_dir}/${dir}" || {
+		echo 'absent'
+		exit 0
+	}
+done
+
+for file in serial index.txt ca.crt private/ca.key
+do
+	test -f "${pki_dir}/${file}" || {
+		echo 'absent'
+		exit 0
+	}
+done
+
+if test -f "${pki_dir}/ca.crt"
+then
+	if openssl x509 -noout -in "${pki_dir}/ca.crt" -checkend 0 >/dev/null
+	then
+		echo 'valid'
+	else
+		echo 'expired'
+	fi
+fi

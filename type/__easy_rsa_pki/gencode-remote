@@ -1,0 +1,118 @@
+#!/bin/sh -e
+#
+# 2020 Marko Seric (marko.seric@ssrq-sds-fds.ch)
+# 2020-2021 Dennis Camera (dennis camera at ssrq-sds-fds.ch)
+#
+# This file is part of the skonfig set __easy_rsa.
+#
+# This set is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This set is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this set. If not, see <http://www.gnu.org/licenses/>.
+#
+
+quote() { printf "'%s'" "$(printf '%s' "$*" | sed -e "s/'/'\\\\''/g")"; }
+drop_awk_comments() { quote "$(sed '/^[[:blank:]]*#.*$/d;/^$/d' "$@")"; }
+quote_nonnum() { sed 's/^.*[^0-9].*$/"&"/;q' "$@"; }
+
+
+os=$(cat "${__global:?}/explorer/os")
+
+state_is=$(cat "${__object:?}/explorer/state")
+
+base_dir="/${__object_id:?}"
+vars_file="${base_dir}/vars"
+
+if test "${state_is}" = 'suspicious'
+then
+	printf "Directory %s exists, but doesn't look like a valid PKI.\n" "${base_dir}" >&2
+	printf 'Please clean it up manually and try again.\n'
+	exit 1
+fi
+
+
+################################################################################
+# Create base directory structure
+
+if test "${state_is}" = 'absent'
+then
+	case ${os}
+	in
+		(debian|devuan)
+			easyrsa_bin='./easyrsa'
+
+			# Create base directory structure using Debian's make-cadir(1)
+			printf 'make-cadir %s\n' "$(quote "${base_dir}")"
+			;;
+		(openwrt)
+			easyrsa_bin='easyrsa'
+
+			# Create base directory structure
+			printf 'test -d %s || mkdir %s\n' \
+				"$(quote "${base_dir}")" "$(quote "${base_dir}")"
+
+			for _file in vars openssl-easyrsa.cnf
+			do
+				# NOTE: /usr/lib/easy-rsa/* actually links into /etc/easy-rsa
+				printf 'cat %s >%s\n' \
+					"$(quote "/usr/lib/easy-rsa/${_file}")" \
+					"$(quote "${base_dir}/${_file}")"
+			done
+			unset _file
+
+			printf 'ln -s %s %s\n' \
+				"$(quote "/usr/lib/easy-rsa/x509-types")" \
+				"$(quote "${base_dir}/x509-types")"
+			;;
+		(*)
+			exit 1  # fail, OS whitelist should be in manifest
+			;;
+	esac
+fi
+
+
+################################################################################
+# Update vars file
+
+# Prepare the information to determine if the vars file needs to be updated,
+# and act accordingly
+vars_and_values=$(
+	while read -r param variable
+	do
+		test -f "${__object:?}/parameter/${param}" || continue
+		printf '%s %s\n' \
+			"${variable}" \
+			"$(quote_nonnum "${__object:?}/parameter/${param}")"
+	done <"${__type:?}/files/param_mapping.txt" \
+	| sort
+)
+
+if ! printf '%s\n' "${vars_and_values}" | cmp -s "${__object:?}/explorer/vars" -
+then
+	cat <<CODE
+awk $(drop_awk_comments "${__type:?}/files/update_vars.awk") <<'EOF' $(quote "${vars_file}") >$(quote "${vars_file}.tmp") \\
+ && cat $(quote "${vars_file}.tmp") >$(quote "${vars_file}") || exit
+${vars_and_values}
+EOF
+rm -f $(quote "${vars_file}.tmp")
+CODE
+fi
+
+
+################################################################################
+# Init PKI subdirectory
+
+if test "${state_is}" = 'absent'
+then
+	# NOTE: init-pki creates a pki subfolder in the current working directory!
+	printf 'cd %s || exit 1\n' "$(quote "${base_dir}")"
+	printf '%s --batch init-pki\n' "${easyrsa_bin}"
+fi

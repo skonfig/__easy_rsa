@@ -1,0 +1,15 @@
+ca-expire-days
+cert-expire-days
+cert-renewal-allowed-days
+crl-publish-days
+default-ec-curve
+default-digest
+default-keysize
+default-city
+default-country
+default-email
+default-org
+default-ou
+default-province
+dn-mode
+use-algo

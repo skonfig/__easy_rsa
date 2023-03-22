@@ -1,0 +1,135 @@
+#!/bin/sh -e
+#
+# 2020 Marko Seric (marko.seric at ssrq-sds-fds.ch)
+# 2020-2021 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
+# 2020 Beni Ruef (bernhard.ruef at ssrq-sds-fds.ch)
+#
+# This file is part of the skonfig set __easy_rsa.
+#
+# This set is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This set is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this set. If not, see <http://www.gnu.org/licenses/>.
+#
+
+quote() { printf "'%s'" "$(printf '%s' "$*" | sed -e "s/'/'\\\\''/g")"; }
+
+os=$(cat "${__global:?}/explorer/os")
+state_is=$(cat "${__object:?}/explorer/state")
+
+base_dir=$(cat "${__object:?}/parameter/dir")
+
+ca_type=$(cat "${__object:?}/parameter/type")
+
+if test -s "${__object:?}/parameter/common-name"
+then
+	common_name=$(cat "${__object:?}/parameter/common-name")
+else
+	common_name=${__object_id:?}
+fi
+
+case ${os}
+in
+	(devuan|debian) easyrsa_bin='./easyrsa' ;;
+	(*) easyrsa_bin='easyrsa' ;;
+esac
+
+case ${state_is}
+in
+	(valid)
+		exit 0
+		;;
+	(expired)
+		printf 'The certificate authority "%s" is expired.\n' "${common_name}" >&2
+		printf 'Please delete (or move away) the directory "%s" so that a fresh CA can be generated.\n' "${base_dir}" >&2
+		exit 1
+		;;
+	(no-pki)
+		# NOTE: The following block is a bit of a "hack" to work around the fact
+		#       that requirements in cdist only work for code, but not for
+		#       explorers. Due to this, it could happen that the state explorer
+		#       executes before the PKI has been initialised.
+
+		# Before doing anything else, check if the pki directory is present.
+		cat <<-EOF
+		test -d $(quote "${base_dir}/pki") || {
+			echo 'Could not find pki directory in ${base_dir}.' >&2
+			echo 'Please make sure that __easy_rsa_pki${base_dir} is run first.' >&2
+			exit 1
+		}
+		EOF
+		;;
+	(absent)
+		# continue below
+		;;
+esac
+
+opt_params=
+# loop through mapping file
+while read -r param option
+do
+	if test -s "${__object:?}/parameter/${param}"
+	then
+		value=$(head -n 1 "${__object:?}/parameter/${param}")
+		opt_params="${opt_params} --${option}=$(quote "${value}")"
+	fi
+done <"${__type:?}/files/param_mapping.txt"
+unset param option
+
+
+cmd_opts=' nopass'
+
+case ${ca_type}
+in
+	(root)
+		if test -f "${__object:?}/parameter/auto-sign-with"
+		then
+			echo 'The parameter --auto-sign-with can only be used together with --type sub.' >&2
+			exit 1
+		fi
+		;;
+	(sub) cmd_opts="${cmd_opts-}${cmd_opts:+ }subca" ;;
+	(*)
+		printf 'Invalid --type: %s\n' "${ca_type}" >&2
+		exit 1
+		;;
+esac
+
+printf 'cd %s || exit 1\n' "$(quote "${base_dir}")"
+printf '%s --pki-dir=%s --vars=%s --req-cn=%s %s --batch build-ca%s\n' \
+	"${easyrsa_bin}" \
+	"$(quote "${base_dir}/pki")" \
+	"$(quote "${base_dir}/vars")" \
+	"$(quote "${common_name}")" \
+	"${opt_params# }" \
+	"${cmd_opts}"
+
+if test "${ca_type}" = 'sub' -a -f "${__object:?}/parameter/auto-sign-with"
+then
+	parent_ca=$(cat "${__object:?}/parameter/auto-sign-with")
+	easyrsa_parent="${easyrsa_bin:?} --pki-dir=$(quote "${parent_ca}/pki") --vars=$(quote "${parent_ca}/vars") --batch"
+
+	cat <<-EOF
+
+	# Sign sub CA
+	days=\$(set_var(){ export "\$1=\$2"; }; EASYRSA_CALLER=1 . $(quote "${base_dir:?}/vars"); echo "\${EASYRSA_CA_EXPIRE:-3650}")
+
+	set -e
+
+	cd $(quote "${parent_ca}")
+
+	${easyrsa_parent} import-req $(quote "${base_dir}/pki/reqs/ca.req") $(quote "${__object_id:?}") \\
+	&& ${easyrsa_parent} --days=\$((days)) sign-req ca $(quote "${__object_id:?}")
+
+	cat $(quote "${parent_ca}/pki/issued/${__object_id:?}.crt") >$(quote "${base_dir}/pki/ca.crt")
+	cat $(quote "${parent_ca}/pki/ca.crt") $(quote "${base_dir}/pki/ca.crt") >$(quote "${base_dir}/pki/chain.pem")
+	EOF
+fi
