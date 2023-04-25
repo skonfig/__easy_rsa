@@ -2,6 +2,13 @@
 
 os=$(cat "${__global:?}/explorer/os")
 
+if test -s "${__object:?}/parameter/common-name"
+then
+	common_name=$(cat "${__object:?}/parameter/common-name")
+else
+	common_name=${__object_id:?}
+fi
+
 cert_type=$(cat "${__object:?}/parameter/cert-type")
 
 case ${os}
@@ -45,8 +52,9 @@ easyrsa_sign_options() (
 )
 
 easyrsa_gen_req_cmd() {
-	printf '%s %s gen-req %s nopass\n' \
+	printf '%s --req-cn=%s %s gen-req %s nopass\n' \
 		"${easyrsa_base_cmd}" \
+		"$(quote "${common_name}")" \
 		"$(easyrsa_request_options)" \
 		"$(quote "${__object_id:?}")"
 }

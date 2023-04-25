@@ -33,6 +33,9 @@ OPTIONAL PARAMETERS
 -------------------
 cert-expiration-days
     Days until expiration of the certificate.
+common-name
+    The Common Name (CN) for this certficiate.
+    Defaults to ``__object_id``.
 digest
     The digest to use for this certificate.
 
