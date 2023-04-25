@@ -6,11 +6,13 @@ cert_type=$(cat "${__object:?}/parameter/cert-type")
 
 case ${os}
 in
-	(devuan|debian) easyrsa_bin='./easyrsa' ;;
-	(*) easyrsa_bin='easyrsa' ;;
+	(devuan|debian)
+		easyrsa_bin='/usr/share/easy-rsa/easyrsa' ;;
+	(*)
+		easyrsa_bin='easyrsa' ;;
 esac
 
-easyrsa_base_cmd="${easyrsa_bin} --pki-dir=$(quote "${base_dir:?}/pki") --vars=$(quote "${base_dir:?}/vars") --batch"
+easyrsa_base_cmd="${easyrsa_bin} --pki-dir=$(quote "${pki_dir:?}") --vars=$(quote "${pki_dir:?}/vars") --batch"
 
 
 easyrsa_request_options() (
@@ -42,15 +44,7 @@ easyrsa_sign_options() (
 	printf '\n'
 )
 
-cd_basedir_cmd() {
-	${cd_done:-false} || {
-		printf 'cd %s || exit 1\n' "$(quote "${base_dir:?}")"
-		cd_done=true
-	}
-}
-
 easyrsa_gen_req_cmd() {
-	cd_basedir_cmd
 	printf '%s %s gen-req %s nopass\n' \
 		"${easyrsa_base_cmd}" \
 		"$(easyrsa_request_options)" \
@@ -58,7 +52,6 @@ easyrsa_gen_req_cmd() {
 }
 
 easyrsa_sign_req_cmd() {
-	cd_basedir_cmd
 	printf '%s %s sign-req %s %s\n' \
 		"${easyrsa_base_cmd}" \
 		"$(easyrsa_sign_options)" \
@@ -80,12 +73,10 @@ easyrsa_build_cmd() {
 }
 
 easyrsa_update_db_cmd() {
-	cd_basedir_cmd
 	printf '%s update-db\n' "${easyrsa_base_cmd}"
 }
 
 easyrsa_renew_cmd() {
-	cd_basedir_cmd
 	printf '%s %s %s renew %s nopass\n' \
 		"${easyrsa_base_cmd}" \
 		"$(easyrsa_request_options)" \
@@ -94,7 +85,6 @@ easyrsa_renew_cmd() {
 }
 
 easyrsa_revoke_cmd() {
-	cd_basedir_cmd
 	printf '%s revoke %s \n' "${easyrsa_base_cmd}" "$(quote "${__object_id:?}")"
 	printf '%s gen-crl\n' "${easyrsa_base_cmd}"
 }

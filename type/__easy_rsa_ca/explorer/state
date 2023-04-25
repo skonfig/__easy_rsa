@@ -1,18 +1,35 @@
 #!/bin/sh -e
 #
+# 2020 Beni Ruef (bernhard.ruef at ssrq-sds-fds.ch)
+# 2020,2023 Dennis Camera (dennis.camera at riiengineering.ch)
+#
+# This file is part of the skonfig set __easy_rsa.
+#
+# This set is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This set is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this set. If not, see <http://www.gnu.org/licenses/>.
+#
 # Prints the current state of the CA:
 # - "present" if the CA is present;
 # - "absent" if the PKI is initialised but the CA has not been created;
 # - "no-pki" if the PKI directory is missing.
 #
 
-base_dir=$(cat "${__object:?}/parameter/dir")
-pki_dir="${base_dir}/pki"
+pki_dir=$(cat "${__object:?}/parameter/dir")
 
 # Check if PKI is present
 
 # shellcheck disable=SC2015
-test -f "${base_dir}/vars" && test -d "${pki_dir}" || {
+test -d "${pki_dir}" || {
 	echo 'no-pki'
 	exit 0
 }

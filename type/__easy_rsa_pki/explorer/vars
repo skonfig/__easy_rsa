@@ -1,5 +1,22 @@
 #!/bin/sh -e
 #
+# 2020,2023 Dennis Camera (dennis.camera at riiengineering.ch)
+#
+# This file is part of the skonfig set __easy_rsa.
+#
+# This set is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This set is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this set. If not, see <http://www.gnu.org/licenses/>.
+#
 # Return the currently set variables in a sorted and "condensed" form.
 # Only variables which are not commented are printed.
 # I.e. each line looks like the following example:
@@ -9,10 +26,10 @@
 # EASYRSA_KEY_SIZE 2048
 #
 
-base_dir="/${__object_id:?}"
-vars_file="${base_dir}/vars"
+pki_dir="/${__object_id:?}"
+vars_file="${pki_dir:?}/vars"
 
-test -f "${vars_file}" || exit 0
+test -f "${vars_file:?}" || exit 0
 
 sed -n 's/^[ \t]*set_var[ \t]\{1,\}\([A-Z_0-9]\{1,\}\)[ \t]\{1,\}/\1 /p' \
 	"${vars_file}" \

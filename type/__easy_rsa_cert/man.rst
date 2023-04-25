@@ -35,7 +35,9 @@ cert-expiration-days
     Days until expiration of the certificate.
 digest
     The digest to use for this certificate.
-    Valid choices include: md5, sha1, sha256, sha224, sha384, sha512
+
+    Valid choices include: ``md5``, ``sha1``, ``sha256``, ``sha224``,
+	``sha384``, ``sha512``
 key-size
     The key size to use for the request.
 state
@@ -67,7 +69,7 @@ org
 org-unit
     Organisational unit.
 email
-    Email.
+    E-mail.
 
 
 BOOLEAN PARAMETERS
@@ -82,12 +84,12 @@ EXAMPLES
 
    # server certificate
    __easy_rsa_cert openvpn-server \
-      --dir /etc/easy-rsa \
+      --dir /etc/easy-rsa/pki \
       --cert-type server
 
    # client certificate
    __easy_rsa_cert janedoe \
-      --dir /etc/easy-rsa \
+      --dir /etc/easy-rsa/pki \
       --cert-type client
 
 
@@ -101,12 +103,12 @@ AUTHORS
 -------
 | Marko Seric <marko.seric--@--ssrq-sds-fds.ch>
 | Beni Ruef <bernhard.ruef--@--ssrq-sds-fds.ch>
-| Dennis Camera <dennis.camera--@--ssrq-sds-fds.ch>
+| Dennis Camera <dennis.camera--@--riiengineering.ch>
 
 
 COPYING
 -------
-Copyright \(C) 2020-2023 the AUTHORS. You can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
+Copyright \(C) 2020-2023 the AUTHORS.
+You can redistribute it and/or modify it under the terms of the GNU General
+Public License as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.

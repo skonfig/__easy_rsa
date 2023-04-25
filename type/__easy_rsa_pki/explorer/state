@@ -1,25 +1,35 @@
 #!/bin/sh -e
 #
-# Return "present" if a PKI folder is found and looks reasonable,
+# 2020 Beni Ruef (bernhard.ruef at ssrq-sds-fds.ch)
+# 2020,2023 Dennis Camera (dennis.camera at riiengineering.ch)
+#
+# This file is part of the skonfig set __easy_rsa.
+#
+# This set is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This set is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this set. If not, see <http://www.gnu.org/licenses/>.
+#
+# Print "present" if a PKI directory structure is found and looks reasonable,
 # "absent" otherwise.
 #
 
-dir="/${__object_id:?}"
+pki_dir="/${__object_id:?}"
 
-if test -d "${dir}"
+if test -d "${pki_dir}"
 then
-	for exp in vars openssl-easyrsa.cnf
-	do
-		test -f "${dir}/${exp}" || {
-			echo 'suspicious'
-			exit 0
-		}
-	done
-
-	# Check pki subdirectory
+	# Check subdirectories
 	for exp in private reqs
 	do
-		test -d "${dir}/pki/${exp}" || {
+		test -d "${pki_dir:?}/${exp}" || {
 			echo 'suspicious'
 			exit 0
 		}

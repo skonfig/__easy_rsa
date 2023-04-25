@@ -1,7 +1,7 @@
 #!/bin/sh -e
 #
 # 2020 Marko Seric (marko.seric at ssrq-sds-fds.ch)
-# 2020-2021 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
+# 2020,2021,2023 Dennis Camera (dennis.camera at riiengineering.ch)
 # 2020 Beni Ruef (bernhard.ruef at ssrq-sds-fds.ch)
 #
 # This file is part of the skonfig set __easy_rsa.
@@ -20,12 +20,16 @@
 # along with this set. If not, see <http://www.gnu.org/licenses/>.
 #
 
-quote() { printf "'%s'" "$(printf '%s' "$*" | sed -e "s/'/'\\\\''/g")"; }
+quote() {
+	sed -e "s/'/'\\\\''/g" -e "1s/^/'/" -e "\$s/\$/'/" <<-EOF
+	$*
+	EOF
+}
 
 os=$(cat "${__global:?}/explorer/os")
 state_is=$(cat "${__object:?}/explorer/state")
 
-base_dir=$(cat "${__object:?}/parameter/dir")
+pki_dir=$(cat "${__object:?}/parameter/dir")
 
 ca_type=$(cat "${__object:?}/parameter/type")
 
@@ -38,8 +42,10 @@ fi
 
 case ${os}
 in
-	(devuan|debian) easyrsa_bin='./easyrsa' ;;
-	(*) easyrsa_bin='easyrsa' ;;
+	(devuan|debian)
+		easyrsa_bin='/usr/share/easy-rsa/easyrsa' ;;
+	(*)
+		easyrsa_bin='easyrsa' ;;
 esac
 
 case ${state_is}
@@ -49,7 +55,7 @@ in
 		;;
 	(expired)
 		printf 'The certificate authority "%s" is expired.\n' "${common_name}" >&2
-		printf 'Please delete (or move away) the directory "%s" so that a fresh CA can be generated.\n' "${base_dir}" >&2
+		printf 'Please delete (or move away) the directory "%s" so that a fresh CA can be generated.\n' "${pki_dir}" >&2
 		exit 1
 		;;
 	(no-pki)
@@ -58,11 +64,11 @@ in
 		#       explorers. Due to this, it could happen that the state explorer
 		#       executes before the PKI has been initialised.
 
-		# Before doing anything else, check if the pki directory is present.
+		# Before doing anything else, check if the --dir is present.
 		cat <<-EOF
-		test -d $(quote "${base_dir}/pki") || {
-			echo 'Could not find pki directory in ${base_dir}.' >&2
-			echo 'Please make sure that __easy_rsa_pki${base_dir} is run first.' >&2
+		test -d $(quote "${pki_dir:?}") || {
+			echo 'Could not find a PKI directory structure in ${pki_dir-?}.' >&2
+			echo 'Please make sure that __easy_rsa_pki${pki_dir-} is run first.' >&2
 			exit 1
 		}
 		EOF
@@ -82,7 +88,7 @@ do
 		opt_params="${opt_params} --${option}=$(quote "${value}")"
 	fi
 done <"${__type:?}/files/param_mapping.txt"
-unset param option
+unset -v param option
 
 
 cmd_opts=' nopass'
@@ -96,40 +102,39 @@ in
 			exit 1
 		fi
 		;;
-	(sub) cmd_opts="${cmd_opts-}${cmd_opts:+ }subca" ;;
+	(sub)
+		cmd_opts="${cmd_opts-} subca"
+		;;
 	(*)
 		printf 'Invalid --type: %s\n' "${ca_type}" >&2
 		exit 1
 		;;
 esac
 
-printf 'cd %s || exit 1\n' "$(quote "${base_dir}")"
 printf '%s --pki-dir=%s --vars=%s --req-cn=%s %s --batch build-ca%s\n' \
 	"${easyrsa_bin}" \
-	"$(quote "${base_dir}/pki")" \
-	"$(quote "${base_dir}/vars")" \
+	"$(quote "${pki_dir}")" \
+	"$(quote "${pki_dir}/vars")" \
 	"$(quote "${common_name}")" \
 	"${opt_params# }" \
 	"${cmd_opts}"
 
 if test "${ca_type}" = 'sub' -a -f "${__object:?}/parameter/auto-sign-with"
 then
-	parent_ca=$(cat "${__object:?}/parameter/auto-sign-with")
-	easyrsa_parent="${easyrsa_bin:?} --pki-dir=$(quote "${parent_ca}/pki") --vars=$(quote "${parent_ca}/vars") --batch"
+	parent_pki=$(cat "${__object:?}/parameter/auto-sign-with")
+	easyrsa_parent="${easyrsa_bin:?} --pki-dir=$(quote "${parent_pki:?}") --vars=$(quote "${parent_pki:?}/vars") --batch"
 
 	cat <<-EOF
 
 	# Sign sub CA
-	days=\$(set_var(){ export "\$1=\$2"; }; EASYRSA_CALLER=1 . $(quote "${base_dir:?}/vars"); echo "\${EASYRSA_CA_EXPIRE:-3650}")
+	days=\$(set_var(){ export "\$1=\$2"; }; EASYRSA_CALLER=1 . $(quote "${pki_dir:?}/vars"); echo "\${EASYRSA_CA_EXPIRE:-3650}")
 
 	set -e
 
-	cd $(quote "${parent_ca}")
-
-	${easyrsa_parent} import-req $(quote "${base_dir}/pki/reqs/ca.req") $(quote "${__object_id:?}") \\
+	${easyrsa_parent} import-req $(quote "${pki_dir:?}/reqs/ca.req") $(quote "${__object_id:?}") \\
 	&& ${easyrsa_parent} --days=\$((days)) sign-req ca $(quote "${__object_id:?}")
 
-	cat $(quote "${parent_ca}/pki/issued/${__object_id:?}.crt") >$(quote "${base_dir}/pki/ca.crt")
-	cat $(quote "${parent_ca}/pki/ca.crt") $(quote "${base_dir}/pki/ca.crt") >$(quote "${base_dir}/pki/chain.pem")
+	cat $(quote "${parent_pki:?}/issued/${__object_id:?}.crt") >$(quote "${pki_dir:?}/ca.crt")
+	cat $(quote "${parent_pki:?}/ca.crt") $(quote "${pki_dir:?}/ca.crt") >$(quote "${pki_dir:?}/chain.pem")
 	EOF
 fi

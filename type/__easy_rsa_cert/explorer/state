@@ -1,5 +1,22 @@
 #!/bin/sh -e
 #
+# 2020,2023 Dennis Camera (dennis.camera at riiengineering.ch)
+#
+# This file is part of the skonfig set __easy_rsa.
+#
+# This set is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This set is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this set. If not, see <http://www.gnu.org/licenses/>.
+#
 # Returns the current state of the certificate:
 #  - "valid" if the certificate exists and is valid.
 #  - "expired" if the certificate exists but has expired.
@@ -7,17 +24,16 @@
 #  - "absent" if the certificate was revoked or was never signed.
 #
 
-base_dir=$(cat "${__object:?}/parameter/dir")
-pki_dir="${base_dir}/pki"
+pki_dir=$(cat "${__object:?}/parameter/dir")
 
 # shellcheck disable=SC2015
-test -f "${base_dir}/vars" && test -d "${pki_dir}" || {
+test -d "${pki_dir-}" || {
 	echo 'no-pki'
 	exit 0
 }
 
-cert_file="${pki_dir}/issued/${__object_id:?}.crt"
-req_file="${pki_dir}/reqs/${__object_id:?}.req"
+cert_file="${pki_dir:?}/issued/${__object_id:?}.crt"
+req_file="${pki_dir:?}/reqs/${__object_id:?}.req"
 
 if test -f "${cert_file}"
 then

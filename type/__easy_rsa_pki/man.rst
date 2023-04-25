@@ -11,16 +11,18 @@ DESCRIPTION
 This cdist type can be used to set up an Easy-RSA PKI structure in the
 ``__object_id`` directory on the target and manage its configuration.
 
-**NB:** That the directory in ``__object_id`` is required to be empty.
-The ``EASYRSA_PKI`` will be located at ``${__object_id}/pki``.
+**NB:** The ``__object_id`` directory is required to be empty.
+The ``EASYRSA_PKI`` will be located at ``__object_id`` (not in a ``pki``
+subdirectory).
 
-The optional parameters will have an effect on the ``vars`` file.
+The optional parameters will have an effect on the ``${__object_id}/vars`` file.
 
-This cdist type does not build an Easy-RSA CA (for this,
+This type does not build an Easy-RSA CA (for this,
 see :strong:`cdist-type__easy_rsa_ca`\ (7)).
 
 One Easy-RSA PKI can hold at most one CA, so it is necessary to
-use this type once for each usage of ``__easy_rsa_ca``.
+use this type for each usage of ``__easy_rsa_ca``.
+
 
 REQUIRED PARAMETERS
 -------------------
@@ -108,11 +110,11 @@ EXAMPLES
 
 .. code-block:: sh
 
-    # Ensure existence of an Easy-RSA PKI structure in directory /etc/easy-rsa
-    __easy_rsa_pki /etc/easy-rsa
+    # Ensure existence of an Easy-RSA PKI structure in directory /etc/easy-rsa/pki
+    __easy_rsa_pki /etc/easy-rsa/pki
 
-    # Ensure existence of a PKI in directory /etc/easy-rsa with defaults
-    __easy_rsa_pki /etc/easy-rsa \
+    # Ensure existence of a PKI in directory /etc/easy-rsa/pki with defaults
+    __easy_rsa_pki /etc/easy-rsa/pki \
         --use-algo rsa \
         --default-keysize 4096 \
         --dn-mode org \
@@ -120,8 +122,8 @@ EXAMPLES
         --default-country CH \
         --default-province SG \
         --default-city Werdenberg \
-        --default-org SSRQ \
-        --default-email test@example.com \
+        --default-org SSRQ-SDS-FDS \
+        --default-email test@ssrq-sds-fds.ch \
         --default-ou "Unit 1"`
 
 
@@ -135,12 +137,12 @@ AUTHORS
 -------
 | Marko Seric <marko.seric--@--ssrq-sds-fds.ch>
 | Beni Ruef <bernhard.ruef--@--ssrq-sds-fds.ch>
-| Dennis Camera <dennis.camera--@--ssrq-sds-fds.ch>
+| Dennis Camera <dennis.camera--@--riiengineering.ch>
 
 
 COPYING
 -------
-Copyright \(C) 2020 the AUTHORS. You can redistribute it
-and/or modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation, either version 3 of the
-License, or (at your option) any later version.
+Copyright \(C) 2020-2023 the AUTHORS.
+You can redistribute it and/or modify it under the terms of the GNU General
+Public License as published by the Free Software Foundation, either version 3 of
+the License, or (at your option) any later version.

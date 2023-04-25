@@ -1,6 +1,6 @@
 #!/bin/sh -e
 #
-# 2021 Dennis Camera (dennis.camera at ssrq-sds-fds.ch)
+# 2021,2023 Dennis Camera (dennis.camera at riiengineering.ch)
 #
 # This file is part of the skonfig set __easy_rsa.
 #
@@ -18,11 +18,10 @@
 # along with this set. If not, see <http://www.gnu.org/licenses/>.
 #
 
-base_dir=/${__object_id:?}
-pki_dir="${base_dir}/pki"
+pki_dir=/${__object_id:?}
 
 # shellcheck disable=SC2015
-test -f "${base_dir}/vars" && test -d "${pki_dir}" || {
+test -d "${pki_dir}" || {
 	echo 'no-pki'
 	exit 0
 }
