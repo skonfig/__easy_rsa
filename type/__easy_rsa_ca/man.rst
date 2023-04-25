@@ -9,7 +9,7 @@ cdist-type__easy_rsa_ca - Build an Easy-RSA Certificate Authority (CA).
 DESCRIPTION
 -----------
 This type sets up an Easy-RSA CA for the PKI directory specified by the
-``--dir`` parameter.
+``--pki`` parameter.
 
 As a prerequisite the :strong:`cdist-type__easy_rsa_pki`\ (7) must have
 created a PKI structure in said directory beforehand.
@@ -19,7 +19,7 @@ To have multiple CAs it is required to create one PKI directory structure (using
 
 The optional parameters have no effect on an already existing CA.
 
-The behaviour of multiple objects with the same ``--dir`` is **undefined**.
+The behaviour of multiple objects with the same ``--pki`` is **undefined**.
 
 **NB:** This type will neither update an existing CA's subject nor other
 parameters if the object's parameters are changed at a later point in time.
@@ -27,7 +27,7 @@ parameters if the object's parameters are changed at a later point in time.
 
 REQUIRED PARAMETERS
 -------------------
-dir
+pki
     Full path of the corresponding Easy-RSA PKI structure (as created by
     :strong:`cdist-type__easy_rsa_pki`\ (7)).
 
@@ -100,17 +100,18 @@ EXAMPLES
     # Set up a CA with common name "Example_CA"
     require=__easy_rsa_pki/etc/easy-rsa/pki \
     __easy_rsa_ca Example_CA \
-        --dir /etc/easy-rsa/pki
+        --pki /etc/easy-rsa/pki
 
     # Set up a CA with a space in its common name
     require=__easy_rsa_pki/etc/easy-rsa/pki \
     __easy_rsa_ca Example_CA \
-        --dir /etc/easy-rsa/pki --common-name 'My Example CA'
+        --pki /etc/easy-rsa/pki \
+        --common-name 'My Example CA'
 
     # Set up a sub CA (and sign it using another CA)
     require=__easy_rsa_pki/etc/easy-rsa/sub \
     __easy_rsa_ca Example_Sub_CA \
-        --dir /etc/easy-rsa/sub \
+        --pki /etc/easy-rsa/sub \
         --common-name 'My Sub CA' \
         --type sub \
         --auto-sign-with /etc/easy-rsa/pki

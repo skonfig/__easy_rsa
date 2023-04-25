@@ -24,7 +24,7 @@ REQUIRED PARAMETERS
 -------------------
 cert-type
     The type of the certificate, either ``server`` or ``client``.
-dir
+pki
     Full path of the corresponding Easy-RSA PKI structure (as created by
     :strong:`cdist-type__easy_rsa_pki`\ (7)).
 
@@ -87,12 +87,12 @@ EXAMPLES
 
    # server certificate
    __easy_rsa_cert openvpn-server \
-      --dir /etc/easy-rsa/pki \
+      --pki /etc/easy-rsa/pki \
       --cert-type server
 
    # client certificate
    __easy_rsa_cert janedoe \
-      --dir /etc/easy-rsa/pki \
+      --pki /etc/easy-rsa/pki \
       --cert-type client
 
 

@@ -29,7 +29,7 @@ quote() {
 os=$(cat "${__global:?}/explorer/os")
 state_is=$(cat "${__object:?}/explorer/state")
 
-pki_dir=$(cat "${__object:?}/parameter/dir")
+pki_dir=$(cat "${__object:?}/parameter/pki")
 
 ca_type=$(cat "${__object:?}/parameter/type")
 
@@ -64,7 +64,7 @@ in
 		#       explorers. Due to this, it could happen that the state explorer
 		#       executes before the PKI has been initialised.
 
-		# Before doing anything else, check if the --dir is present.
+		# Before doing anything else, check if the --pki is present.
 		cat <<-EOF
 		test -d $(quote "${pki_dir:?}") || {
 			echo 'Could not find a PKI directory structure in ${pki_dir-?}.' >&2

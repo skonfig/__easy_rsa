@@ -24,7 +24,7 @@
 #  - "absent" if the certificate was revoked or was never signed.
 #
 
-pki_dir=$(cat "${__object:?}/parameter/dir")
+pki_dir=$(cat "${__object:?}/parameter/pki")
 
 # shellcheck disable=SC2015
 test -d "${pki_dir-}" || {

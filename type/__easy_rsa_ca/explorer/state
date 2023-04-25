@@ -24,7 +24,7 @@
 # - "no-pki" if the PKI directory is missing.
 #
 
-pki_dir=$(cat "${__object:?}/parameter/dir")
+pki_dir=$(cat "${__object:?}/parameter/pki")
 
 # Check if PKI is present
 

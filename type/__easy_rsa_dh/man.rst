@@ -46,7 +46,7 @@ EXAMPLES
 .. code-block:: sh
 
    # Create /etc/easy-rsa/pki/dh.pem
-   __easy_rsa_dh /etc/easy-rsa
+   __easy_rsa_dh /etc/easy-rsa/pki
 
 
 SEE ALSO
