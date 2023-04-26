@@ -30,10 +30,15 @@ then
 	for exp in private reqs
 	do
 		test -d "${pki_dir:?}/${exp}" || {
-			echo 'suspicious'
+			echo 'present suspicious'
 			exit 0
 		}
 	done
+
+	test -f "${pki_dir:?}/vars" || {
+		echo 'present no-vars'
+		exit 0
+	}
 
 	echo 'present'
 else

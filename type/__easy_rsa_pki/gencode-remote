@@ -30,12 +30,12 @@ quote_nonnum() { sed 's/^.*[^0-9].*$/"&"/;q' "$@"; }
 
 os=$(cat "${__global:?}/explorer/os")
 
-state_is=$(cat "${__object:?}/explorer/state")
+read -r state_is state_extra <"${__object:?}/explorer/state"
 
 pki_dir="/${__object_id:?}"
 vars_file="${pki_dir:?}/vars"
 
-if test "${state_is}" = 'suspicious'
+if test "${state_is}-${state_extra}" = 'present-suspicious'
 then
 	printf "Directory %s exists, but doesn't look like a valid PKI.\n" "${pki_dir-}" >&2
 	printf 'Please clean it up manually and try again.\n'
@@ -47,9 +47,11 @@ case ${os}
 in
 	(debian|devuan)
 		easyrsa_bin='/usr/share/easy-rsa/easyrsa'
+		vars_example='/usr/share/easy-rsa/vars.example'
 		;;
 	(openwrt)
 		easyrsa_bin='easyrsa'
+		vars_example='/etc/easy-rsa/vars'
 		;;
 	(*)
 		exit 1  # fail, OS whitelist should be in manifest
@@ -57,19 +59,32 @@ in
 esac
 
 
-################################################################################
+###############################################################################
 # Create PKI directory structure
 
 case ${state_is}
 in
 	(absent)
+		# initialise PKI directory structure
 		printf '%s --batch --pki-dir=%s init-pki\n' \
 			"${easyrsa_bin}" "$(quote "${pki_dir:?}")"
 		;;
 esac
 
+case ${state_is}-${state_extra}
+in
+	(absent-*|present-no-vars)
+		# ensure a vars file is present
+		# easy-rsa < 3.0.9 doesn't create a vars file by default,
+		# or the vars file could've been deleted
+		printf 'test -f %s/vars || cp -f -p %s %s\n' \
+			"$(quote "${pki_dir:?}")" \
+			"$(quote "${vars_example:?}")" "$(quote "${pki_dir:?}")"
+		;;
+esac
 
-################################################################################
+
+###############################################################################
 # Update vars file
 
 # Prepare the information to determine if the vars file needs to be updated,
