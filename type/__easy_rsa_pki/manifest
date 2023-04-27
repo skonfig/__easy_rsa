@@ -21,15 +21,18 @@
 
 os=$(cat "${__global:?}/explorer/os")
 
+# Ensure that easy-rsa is installed
 case ${os}
 in
-	(debian|devuan)
-		# Ensure that easy-rsa is installed
-		__package easy-rsa --state present
+	(alpine)
+		# FIXME: requires community repository
+		__package easy-rsa
+		;;
+	(archlinux|debian|devuan|freebsd|netbsd|openbsd|centos|fedora|redhat|suse|ubuntu)
+		__package easy-rsa
 		;;
 	(openwrt)
-		# Ensure that easy-rsa is installed
-		__package_opkg openvpn-easy-rsa --state present
+		__package openvpn-easy-rsa
 		;;
 	(*)
 		: "${__type:?}"  # make shellcheck happy
